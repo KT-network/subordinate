@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/main_menu_devices"
+        android:icon="@drawable/menu_mian_svg_devices"
+        android:title="@string/main_menu_devices" />
+    <item
+        android:id="@+id/main_menu_discover"
+        android:icon="@drawable/menu_main_svg_discover"
+        android:title="@string/main_menu_discover" />
+    <item
+        android:id="@+id/main_menu_me"
+        android:icon="@drawable/menu_main_svg_me"
+        android:title="@string/main_menu_me" />
+</menu>
