@@ -11,4 +11,26 @@
     <string name="main_menu_discover">发现</string>
     <string name="main_menu_me">我的</string>
 
+
+    <string name="add_devices_title">添加设备</string>
+    <string name="devices_reset">设备重置</string>
+
+    <string name="connect_devices_title">连接设备</string>
+    <string name="connect_devices_name">设备名称</string>
+    <string name="connect_devices_examine_connect">检查连接</string>
+    <string name="connect_devices_config">配置设备</string>
+    <string name="connect_devices_state_config">开始配置</string>
+    <string name="connect_devices_hint_title">连接提示</string>
+    <string name="connect_devices_hint_data">请确保手机已连接设备的wifi热点。</string>
+
+
+    <string-array name="test_add_devices_item_data">
+
+        <item>测试设备1</item>
+        <item>测试设备2</item>
+        <item>测试设备3</item>
+        <item>测试设备4</item>
+
+    </string-array>
+
 </resources>
