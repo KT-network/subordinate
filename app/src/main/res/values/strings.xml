@@ -22,8 +22,21 @@
     <string name="connect_devices_state_config">开始配置</string>
     <string name="connect_devices_hint_title">连接提示</string>
     <string name="connect_devices_hint_data">请确保手机已连接设备的wifi热点。</string>
+    
+    
+    <string name="config_devices_title">配置设备</string>
+    <string name="config_devices_title_init">初始配置</string>
+    <string name="config_devices_title_cloud">远程配置</string>
+    <string name="config_devices_title_land">本地配置</string>
 
 
+    <string name="config_devices_test_connect_btn">连接测试</string>
+    <string name="config_devices_save_btn">保存配置</string>
+
+    <string name="config_devices_connect_state">连接状态</string>
+    <string name="config_devices_connect_state_true">已连接</string>
+    <string name="config_devices_connect_state_false">已断开连接</string>
+    
     <string-array name="test_add_devices_item_data">
 
         <item>测试设备1</item>

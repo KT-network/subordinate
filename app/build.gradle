@@ -51,4 +51,8 @@ dependencies {
     // 带加载的按钮
     implementation 'com.github.FlodCoding:LoadingButton:1.1.0-alpha01'
 
+
+    // Sqlite
+    implementation 'org.litepal.guolindev:core:3.2.3'
+
 }

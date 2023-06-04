@@ -12,6 +12,7 @@
 
 
     <application
+        android:name=".BaseApplication"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -38,6 +39,7 @@
 
         <activity android:name=".AddDevicesActivity"/>
         <activity android:name=".ConnectDevicesActivity"/>
+        <activity android:name=".ConfigActivity"/>
 
     </application>
 

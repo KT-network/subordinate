@@ -1,0 +1,386 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/connect_devices_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minHeight="?actionBarSize"
+        app:navigationIcon="@drawable/baseline_arrow_back_24"
+        app:title="@string/connect_devices_title" />
+
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="10dp">
+
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardBackgroundColor="@color/add_devices_item"
+                app:cardCornerRadius="5dp"
+                android:layout_marginTop="5dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical"
+                    android:padding="5dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="30dp"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="连接状态"
+                            android:textColor="@color/black"
+                            android:textSize="15sp" />
+
+                        <TextView
+                            android:id="@+id/config_devices_connect_state"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="已连接"
+                            android:textColor="@color/green"/>
+
+
+                    </LinearLayout>
+
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="30dp"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="设备标识"
+                            android:textColor="@color/black"
+                            android:textSize="15sp" />
+
+                        <TextView
+                            android:id="@+id/config_devices_id"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="123132131" />
+
+
+                    </LinearLayout>
+                </LinearLayout>
+
+            </androidx.cardview.widget.CardView>
+
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="15dp"
+                app:cardBackgroundColor="@color/add_devices_item"
+                app:cardCornerRadius="5dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical"
+                    android:padding="5dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="45dp"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="设备名称"
+                            android:textColor="@color/black"
+                            android:textSize="15sp" />
+
+                        <EditText
+                            android:id="@+id/config_devices_name_edit"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="测试"/>
+
+
+                    </LinearLayout>
+
+
+                </LinearLayout>
+
+            </androidx.cardview.widget.CardView>
+
+
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardBackgroundColor="@color/add_devices_item"
+                android:layout_marginTop="15dp"
+                app:cardCornerRadius="5dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical"
+                    android:padding="5dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="45dp"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="WiFi"
+                            android:textColor="@color/black"
+                            android:textSize="15sp" />
+
+                        <EditText
+                            android:id="@+id/config_devices_wifi_ssid_edit"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="TP-LINK_DD99"/>
+
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="45dp"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="密码"
+                            android:textColor="@color/black"
+                            android:textSize="15sp" />
+
+                        <EditText
+                            android:id="@+id/config_devices_wifi_pwd_edit"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="123123123"/>
+
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="45dp"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="IP"
+                            android:textColor="@color/black"
+                            android:textSize="15sp" />
+
+                        <EditText
+                            android:id="@+id/config_devices_wifi_ip_edit"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="192.168.0.159"/>
+
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="45dp"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="网关"
+                            android:textColor="@color/black"
+                            android:textSize="15sp" />
+
+                        <EditText
+                            android:id="@+id/config_devices_wifi_gateway_edit"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="192.168.0.254"/>
+
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="45dp"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <CheckBox
+                            android:id="@+id/config_devices_wifi_auto_ip"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="静态ip"/>
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+            </androidx.cardview.widget.CardView>
+
+
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="15dp"
+                app:cardBackgroundColor="@color/add_devices_item"
+                app:cardCornerRadius="5dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical"
+                    android:padding="5dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="45dp"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="mqtt地址"
+                            android:textColor="@color/black"
+                            android:textSize="15sp" />
+
+                        <EditText
+                            android:id="@+id/config_devices_mqtt_host_edit"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="124.70.108.79"/>
+
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="45dp"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="端口"
+                            android:textColor="@color/black"
+                            android:textSize="15sp" />
+
+                        <EditText
+                            android:id="@+id/config_devices_mqtt_port_edit"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="1883"/>
+
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="45dp"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="用户名"
+                            android:textColor="@color/black"
+                            android:textSize="15sp" />
+
+                        <EditText
+                            android:id="@+id/config_devices_mqtt_user_edit"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="public"/>
+
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="45dp"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="密码"
+                            android:textColor="@color/black"
+                            android:textSize="15sp" />
+
+                        <EditText
+                            android:id="@+id/config_devices_mqtt_pwd_edit"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="123456"/>
+
+
+                    </LinearLayout>
+
+
+                </LinearLayout>
+
+            </androidx.cardview.widget.CardView>
+
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="45dp"
+                app:cardCornerRadius="22.5dp"
+                android:layout_marginTop="50dp"
+                app:cardBackgroundColor="@color/purple_500">
+                <RelativeLayout
+                    android:id="@+id/config_devices_test_connect_btn"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+
+                    <TextView
+                        android:id="@+id/config_devices_test_connect_txt"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/config_devices_test_connect_btn"
+                        android:textSize="16sp"
+                        android:textColor="@color/white"
+                        android:layout_centerInParent="true"/>
+
+
+                </RelativeLayout>
+            </androidx.cardview.widget.CardView>
+
+
+
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

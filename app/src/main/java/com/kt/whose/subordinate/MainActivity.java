@@ -8,16 +8,23 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.FrameLayout;
 
 import com.kt.whose.subordinate.Fragment.Main.DevicesFragment;
 import com.kt.whose.subordinate.Fragment.Main.DiscoverFragment;
 import com.kt.whose.subordinate.Fragment.Main.MeFragment;
+import com.kt.whose.subordinate.Utils.model.DevicesInfoSql;
+
+import org.litepal.LitePal;
+
+import java.util.List;
 
 import nl.joery.animatedbottombar.AnimatedBottomBar;
 
 public class MainActivity extends AppCompatActivity {
 
+    private static final String TAG = "MainActivity";
     Toolbar toolbar;
     FrameLayout frameLayout;
     AnimatedBottomBar bottom_bar;
@@ -34,7 +41,17 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+
         initView();
+
+
+        List<DevicesInfoSql> devicesInfoSqlList = LitePal.findAll(DevicesInfoSql.class);
+
+        Log.i(TAG, "onCreate: "+devicesInfoSqlList.size());
+
+
+
+
 
     }
 

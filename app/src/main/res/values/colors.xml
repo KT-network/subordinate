@@ -9,5 +9,9 @@
     <color name="white">#FFFFFFFF</color>
     
     <color name="add_devices_item">#f5f5f5</color>
+
+
+    <color name="green">#00C853</color>
+    <color name="red">#D50000</color>
     
 </resources>

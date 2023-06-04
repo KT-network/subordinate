@@ -134,6 +134,7 @@ public class SocketClient {
                 System.arraycopy(this.m_RecvBuffer, 0, buffer, 0, size);
                 this.onDataReceive(buffer);
             } catch (Exception var4) {
+                var4.printStackTrace();
                 this.onTrace("Socket (" + this.m_host + ":" + this.m_port + ") Read Buffer Exception.");
                 this.close();
                 return;
@@ -143,6 +144,7 @@ public class SocketClient {
                 try {
                     Thread.sleep(0L);
                 } catch (Exception var3) {
+                    var3.printStackTrace();
                     this.onTrace("Thread Sleep Exception.");
                     this.close();
                     return;
@@ -160,6 +162,7 @@ public class SocketClient {
                 dos.flush();
             }
         } catch (Exception var3) {
+            var3.printStackTrace();
             this.onTrace("Socket (" + this.m_host + ":" + this.m_port + ") Send Buffer Exception.");
             this.close();
         }
