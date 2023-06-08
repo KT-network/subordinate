@@ -32,7 +32,6 @@ public class AddDevicesAdapter extends RecyclerView.Adapter<AddDevicesAdapter.It
 
     @Override
     public void onBindViewHolder(@NonNull AddDevicesAdapter.ItemViewHolder holder, int position) {
-
         holder.textView.setText(data[position]);
     }
 

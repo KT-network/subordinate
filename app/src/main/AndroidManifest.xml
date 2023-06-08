@@ -41,6 +41,11 @@
         <activity android:name=".ConnectDevicesActivity"/>
         <activity android:name=".ConfigActivity"/>
 
+<!--        <service android:name=".Utils.MqttMsgService"/>-->
+
+
+        <service android:name=".Utils.mqtt.KsMqttService"/>
+
     </application>
 
 

@@ -15,6 +15,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.kt.whose.subordinate.Interface.SocketClientListener;
+import com.kt.whose.subordinate.Utils.LoadDialog;
 import com.kt.whose.subordinate.Utils.SocketClient;
 import com.kt.whose.subordinate.Utils.SocketDataBase;
 import com.kt.whose.subordinate.Utils.Tool;
@@ -30,6 +31,7 @@ public class ConfigActivity extends AppCompatActivity {
     private int stateActivity = 1;
 
     private SocketClient socketClient;
+    private LoadDialog loadDialog;
 
     // socket 连接的ip与端口
     private int PORT = 1006;
@@ -45,7 +47,6 @@ public class ConfigActivity extends AppCompatActivity {
     TextView btn_txt, devices_id, connect_state;
     EditText editName, editWifiSsid, editWifiPwd, editWifiIp, editWifiGateway, editMqttHost, editMqttPort, editMqttUser, editMqttPwd;
     CheckBox autoWifiIp;
-
 
 
     @Override
@@ -90,6 +91,8 @@ public class ConfigActivity extends AppCompatActivity {
 
         autoWifiIp = findViewById(R.id.config_devices_wifi_auto_ip);
         autoWifiIp.setOnCheckedChangeListener(autoWifiIpListener);
+
+        loadDialog = new LoadDialog(getApplicationContext());
 
     }
 
@@ -179,11 +182,18 @@ public class ConfigActivity extends AppCompatActivity {
 
                 } else if (type.equals("setDevicesInfo")) {
                     JSONObject data = jsonObject.getJSONObject("data");
-                    if (data.getBoolean("state")){
+                    if (data.getBoolean("state")) {
                         saveInfo();
                     }
 
-                    Toast.makeText(ConfigActivity.this, data.getBoolean("state") == true ? "配置成功" : "配置失败", Toast.LENGTH_SHORT).show();
+                    String m = data.getBoolean("state") == true ? "配置成功" : "配置失败";
+
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(ConfigActivity.this, m, Toast.LENGTH_SHORT).show();
+                        }
+                    });
 
 
                 }
@@ -237,8 +247,8 @@ public class ConfigActivity extends AppCompatActivity {
 
 
     /*
-    * 获取配置信息
-    * */
+     * 获取配置信息
+     * */
     private String getEditName() {
         return editName.getText().toString();
     }

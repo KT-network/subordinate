@@ -16,6 +16,8 @@ public class DevicesInfoSql extends LitePalSupport {
     // 设备类型
     private String devicesType;
 
+    private String picUrl;
+
     private String devicesWifiSsid;
 
     private String devicesWifiPwd;
@@ -126,5 +128,13 @@ public class DevicesInfoSql extends LitePalSupport {
 
     public void setId(long id) {
         this.id = id;
+    }
+
+    public String getPicUrl() {
+        return picUrl;
+    }
+
+    public void setPicUrl(String picUrl) {
+        this.picUrl = picUrl;
     }
 }

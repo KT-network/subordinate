@@ -6,8 +6,20 @@ import android.net.DhcpInfo;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
+import android.widget.Toast;
 
 public class Tool {
+
+
+    public static void Toast(Context context,String msg){
+        Toast.makeText(context, msg+"", Toast.LENGTH_SHORT).show();
+
+    }
+
+    public static void Toast(Context context,int msg){
+        Toast.makeText(context, msg+"", Toast.LENGTH_SHORT).show();
+    }
+
 
     /*
     * 判断wifi是否连接

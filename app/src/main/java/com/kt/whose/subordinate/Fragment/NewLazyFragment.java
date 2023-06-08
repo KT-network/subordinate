@@ -48,6 +48,7 @@ public abstract class NewLazyFragment extends Fragment {
         if (isFirstLoad) {
             initEvent();
             initData();
+
             isFirstLoad = false;
         }
     }
