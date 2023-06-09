@@ -12,17 +12,7 @@ public class SocketDataBase {
             jsonObject.put("type","handshake");
             JSONObject jsonObject1 = new JSONObject();
             jsonObject1.put("handshake","hello subordinate");
-            /*jsonObject1.put("zzz","hello subordinate");
-            jsonObject1.put("aaa","hello subordinate");
-            jsonObject1.put("sss","hello subordinate");
-            jsonObject1.put("ddd","hello subordinate");
-            jsonObject1.put("fff","hello subordinate");
-            jsonObject1.put("ggg","hello subordinate");
-            jsonObject1.put("sda","hello subordinate");
-            jsonObject1.put("ada","hello subordinate");
-            jsonObject1.put("dasda","hello subordinate");*/
-
-
+            jsonObject1.put("id","65535-ks");
             jsonObject.put("data",jsonObject1);
 
         } catch (JSONException e) {

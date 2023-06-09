@@ -56,7 +56,14 @@ dependencies {
     implementation 'org.litepal.guolindev:core:3.2.3'
 
     // mqtt
-     //implementation 'org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.1.0'
-     //implementation 'org.eclipse.paho:org.eclipse.paho.android.service:1.1.1'
+    // implementation 'org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.1.0'
+    // implementation 'org.eclipse.paho:org.eclipse.paho.android.service:1.1.1'
+
+    // startActivityForResult
+    implementation 'com.github.lesincs:StartActivityForResultHelper:1.0.0'
+
+    implementation 'com.alespero:expandable-cardview:0.8'
+
+
 
 }

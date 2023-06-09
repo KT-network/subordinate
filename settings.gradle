@@ -22,6 +22,7 @@ dependencyResolutionManagement {
         maven {
             url  "https://dl.bintray.com/swallowsonny/ext"
         }
+        maven { url 'https://dl.bintray.com/lesincs/maven' }
 
 
         maven { url 'https://maven.aliyun.com/repository/public/' }

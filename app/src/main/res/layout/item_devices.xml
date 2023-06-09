@@ -17,7 +17,7 @@
             android:id="@+id/item_devices_connect_state_icon"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/baseline_link_off_24"
+            android:src="@drawable/baseline_link_selector"
             android:layout_alignParentTop="true"
             android:layout_marginStart="5dp"
             android:layout_marginTop="5dp"/>
@@ -34,7 +34,7 @@
             android:id="@+id/item_devices_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/config_devices_test_connect_btn"
+            android:text="测试"
             android:layout_centerInParent="true"
             android:layout_below="@id/item_devices_pic"
             android:layout_marginTop="15dp"/>

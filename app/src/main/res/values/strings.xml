@@ -30,12 +30,16 @@
     <string name="config_devices_title_land">本地配置</string>
 
 
-    <string name="config_devices_test_connect_btn">连接测试</string>
+    <string name="config_devices_connect_btn">连接到设备</string>
+    <string name="config_devices_wifi_connect_btn">wifi连接测试</string>
     <string name="config_devices_save_btn">保存配置</string>
 
     <string name="config_devices_connect_state">连接状态</string>
     <string name="config_devices_connect_state_true">已连接</string>
     <string name="config_devices_connect_state_false">已断开连接</string>
+
+
+    <string name="devices_control_title">设备详情</string>
 
 
     <string name="login_name">登录</string>

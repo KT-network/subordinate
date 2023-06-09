@@ -1,7 +1,6 @@
-package com.kt.whose.subordinate.Utils.model;
+package com.kt.whose.subordinate.Utils.sqlModel;
 
 
-import org.litepal.annotation.Column;
 import org.litepal.crud.LitePalSupport;
 
 public class DevicesInfoSql extends LitePalSupport {
@@ -33,6 +32,10 @@ public class DevicesInfoSql extends LitePalSupport {
     private String devicesMqttUser;
 
     private String devicesMqttPwd;
+
+    private boolean state;
+    private long lastTime;
+    private long nowTime;
 
     public String getName() {
         return name;
@@ -136,5 +139,29 @@ public class DevicesInfoSql extends LitePalSupport {
 
     public void setPicUrl(String picUrl) {
         this.picUrl = picUrl;
+    }
+
+    public boolean isState() {
+        return state;
+    }
+
+    public void setState(boolean state) {
+        this.state = state;
+    }
+
+    public long getNowTime() {
+        return nowTime;
+    }
+
+    public void setNowTime(long nowTime) {
+        this.nowTime = nowTime;
+    }
+
+    public long getLastTime() {
+        return lastTime;
+    }
+
+    public void setLastTime(long lastTime) {
+        this.lastTime = lastTime;
     }
 }

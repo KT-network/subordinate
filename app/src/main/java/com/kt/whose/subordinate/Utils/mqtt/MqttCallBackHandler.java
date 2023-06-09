@@ -1,13 +1,6 @@
 package com.kt.whose.subordinate.Utils.mqtt;
 
-import android.content.ComponentName;
-import android.content.Context;
-import android.content.Intent;
-import android.content.ServiceConnection;
-import android.os.IBinder;
 import android.util.Log;
-
-import com.kt.whose.subordinate.Utils.MqttMsgService;
 
 import org.eclipse.paho.client.mqttv3.IMqttActionListener;
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;

@@ -46,9 +46,9 @@ public abstract class NewLazyFragment extends Fragment {
     public void onResume() {
         super.onResume();
         if (isFirstLoad) {
+
             initEvent();
             initData();
-
             isFirstLoad = false;
         }
     }

@@ -13,6 +13,7 @@ import com.kt.whose.subordinate.R;
 
 
 public class LoadDialog {
+
     private AlertDialog alertDialog;
     View view;
     TextView msg;
@@ -31,6 +32,7 @@ public class LoadDialog {
 
     public void setMsg(String msg1){
         msg.setText(msg1);
+
     }
 
     public void show(){
