@@ -16,10 +16,14 @@
 
     <color name="link_off_24">#CFCFCF</color>
 
+    <color name="register_card">#C8DCDCDC</color>
+
 
 
 
 
     <color name="ThemeColor">#f8f8f8</color>
+
+    <color name="help">#D6D6D6</color>
     
 </resources>

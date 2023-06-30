@@ -1,6 +1,6 @@
 package com.kt.whose.subordinate.Utils.sqlModel;
 
-public class DevicesInfoBase extends DevicesInfoSql{
+public class DevicesInfoBase {
     private boolean state;
 
     public boolean isState() {

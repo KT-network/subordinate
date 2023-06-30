@@ -29,7 +29,7 @@ public class ConnectDevicesActivity extends BaseActivity {
     RelativeLayout btn;
     TextView btn_txt;
 
-    private boolean examine_connect = false;
+    private boolean firstIs = false;
 
 
     @Override
@@ -62,7 +62,7 @@ public class ConnectDevicesActivity extends BaseActivity {
         @Override
         public void onClick(View view) {
 
-            if (Tool.isWifiConnect(getApplicationContext()) && Tool.getWifiDhcpAddress(getApplicationContext()).equals("192.168.4.1")) {
+            if (Tool.isWifiConnect(getApplicationContext()) && Tool.getWifiDhcpAddress(getApplicationContext()).equals("192.168.5.1")) {
 
                 Intent intent = new Intent(getApplicationContext(),ConfigActivity.class);
                 intent.putExtra("code",0);

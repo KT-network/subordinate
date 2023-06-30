@@ -1,5 +1,6 @@
 package com.kt.whose.subordinate.Activity;
 
+import android.animation.TimeAnimator;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -20,6 +21,8 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.kongzue.dialogx.dialogs.TipDialog;
+import com.kongzue.dialogx.dialogs.WaitDialog;
 import com.kt.whose.subordinate.Broadcast.BroadcastTag;
 import com.kt.whose.subordinate.Interface.SocketClientListener;
 import com.kt.whose.subordinate.R;
@@ -28,6 +31,7 @@ import com.kt.whose.subordinate.Utils.SocketClient;
 import com.kt.whose.subordinate.Utils.SocketDataBase;
 import com.kt.whose.subordinate.Utils.Tool;
 import com.kt.whose.subordinate.Utils.sqlModel.DevicesInfoSql;
+
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -50,8 +54,8 @@ public class ConfigActivity extends BaseActivity {
 
     // socket 连接的ip与端口
     //private int PORT = 1006;
-    private String IP = "192.168.4.1";
-    private String URL = "http://192.168.4.1/";
+    private String IP = "192.168.5.1";
+    private String URL = "http://192.168.5.1/";
 
     // 记录测试连接是否成功 (-1 断开连接，0测试连接，1保存配置)
     private int isTest = -1;
@@ -111,21 +115,14 @@ public class ConfigActivity extends BaseActivity {
         Intent intent = getIntent();
         stateActivity = intent.getIntExtra("code", 1);
         handler = new Handler();
+        WaitDialog.show("设备连接中...");
 
-        if (Tool.isWifiConnect(getApplicationContext()) && Tool.getWifiDhcpAddress(getApplicationContext()).equals(IP)){
-            httpPost(null,SocketDataBase.getHandshakeData());
-        }else {
+        if (Tool.isWifiConnect(getApplicationContext()) && Tool.getWifiDhcpAddress(getApplicationContext()).equals(IP)) {
+            httpPost(null, SocketDataBase.getHandshakeData());
+        } else {
             setConnectState(false);
-            Log.i(TAG, "initEvent: wifi连接错误");
-        }
-
-        String s = "{\"data\": {\"handshake\": \"hello general\", \"id\": \"6055f9743d20\"}, \"type\": \"handshake\"}";
-
-        try {
-            JSONObject jsonObject1 = new JSONObject(s);
-            Log.i(TAG, "initEvent: "+jsonObject1.getString("type"));
-        } catch (JSONException e) {
-            throw new RuntimeException(e);
+            WaitDialog.dismiss();
+            TipDialog.show("设备连接失败！", WaitDialog.TYPE.ERROR);
         }
 
 
@@ -135,34 +132,29 @@ public class ConfigActivity extends BaseActivity {
     private View.OnClickListener onClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
-            /*String data = SocketDataBase.verifyDevicesInfoData(autoWifiIpState,
-                    getEditWifiSsid(),
-                    getEditWifiPwd(),
-                    getEditWifiIp(),
-                    "255.255.255.0",
-                    getEditWifiGateway());
-            httpPost(null,SocketDataBase.getHandshakeData());*/
+            if (isTest == -1) {
+                WaitDialog.show("设备连接中...");
+                if (Tool.isWifiConnect(getApplicationContext()) && Tool.getWifiDhcpAddress(getApplicationContext()).equals(IP)) {
 
-            if (isTest == -1){
-                if (Tool.isWifiConnect(getApplicationContext()) && Tool.getWifiDhcpAddress(getApplicationContext()).equals(IP)){
-                    loadDialog.setMsg("设备连接中...");
-                    loadDialog.show();
-                    httpPost(null,SocketDataBase.getHandshakeData());
-                }else {
+                    httpPost(null, SocketDataBase.getHandshakeData());
+                } else {
+                    WaitDialog.dismiss();
+                    TipDialog.show("设备连接失败！", WaitDialog.TYPE.ERROR);
                     setConnectState(false);
                 }
             } else if (isTest == 0) {
-                loadDialog.setMsg("wifi连接中...");
-                loadDialog.show();
 
+                WaitDialog.show("wifi连接测试中...");
                 String data = SocketDataBase.verifyDevicesInfoData(autoWifiIpState,
                         getEditWifiSsid(),
                         getEditWifiPwd(),
                         getEditWifiIp(),
                         "255.255.255.0",
                         getEditWifiGateway());
-                httpPost(null,data);
+
+                httpPost(null, data);
             } else if (isTest == 1) {
+                WaitDialog.show("配置信息保存中...");
                 String data = SocketDataBase.setDevicesInfoData(autoWifiIpState,
                         getEditWifiSsid(),
                         getEditWifiPwd(),
@@ -173,8 +165,11 @@ public class ConfigActivity extends BaseActivity {
                         getEditMqttPort(),
                         getEditMqttUser(),
                         getEditMqttPwd());
+                Log.i(TAG, "onClick: wifi 保存");
 
-                httpPost(null,data);
+                httpPost(null, data);
+            } else if (isTest == 2) {
+                httpPost(null,SocketDataBase.getRestart());
             }
 
 
@@ -189,7 +184,6 @@ public class ConfigActivity extends BaseActivity {
             finish();
         }
     };
-
 
 
     // 设置 设备id
@@ -220,7 +214,7 @@ public class ConfigActivity extends BaseActivity {
         });
     }
 
-    private void setBtnTxt(int s){
+    private void setBtnTxt(int s) {
         handler.post(new Runnable() {
             @Override
             public void run() {
@@ -321,15 +315,19 @@ public class ConfigActivity extends BaseActivity {
                     connection.setDoOutput(true);
                     connection.setDoInput(true);
                     connection.setRequestProperty("GeneralId", "TOKEN");
+                    connection.setConnectTimeout(17000);
+                    connection.setReadTimeout(17000);
 
                     // 提交数据（获取输出流，提交数据到输出流）
                     DataOutputStream dataOutputStream = new DataOutputStream(connection.getOutputStream());
                     dataOutputStream.writeBytes(date);
                     dataOutputStream.close();
-                    if (connection.getResponseCode() == 200){
+
+                    if (connection.getResponseCode() == 200) {
+
                         String res = is2String(connection.getInputStream());
 
-                        Log.i(TAG, "run: "+res);
+                        Log.i(TAG, "run: " + res);
                         JSONObject jo = new JSONObject(res);
                         JSONObject jsonObject = new JSONObject(res);
                         String type = jsonObject.getString("type");
@@ -342,42 +340,68 @@ public class ConfigActivity extends BaseActivity {
                             isTest = 0;
 
                             setBtnTxt(R.string.config_devices_wifi_connect_btn);
-                            closeLoadDialog(3000);
+                            handler.postDelayed(new Runnable() {
+                                @Override
+                                public void run() {
 
-                            //socketClient.send(SocketDataBase.getDevicesIdData().getBytes());
-                        }  else if (type.equals("verifyDevicesInfo")) {
+                                    TipDialog.show("设备连接成功！", WaitDialog.TYPE.SUCCESS);
+                                }
+                            }, 1000);
+
+                        } else if (type.equals("verifyDevicesInfo")) {
                             JSONObject data = jsonObject.getJSONObject("data");
                             Log.i(TAG, "onDataReceive: " + data.getBoolean("state"));
                             if (data.getBoolean("state")) {
                                 isTest = 1;
                                 setBtnTxt(R.string.config_devices_save_btn);
+
+                                handler.postDelayed(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        WaitDialog.dismiss();
+                                        TipDialog.show("wifi连接成功！", WaitDialog.TYPE.SUCCESS);
+                                    }
+                                }, 1000);
+                                return;
                             }
-                            closeLoadDialog(0);
+
+                            handler.postDelayed(new Runnable() {
+                                @Override
+                                public void run() {
+                                    WaitDialog.dismiss();
+                                    TipDialog.show("wifi连接失败！", WaitDialog.TYPE.ERROR);
+                                }
+                            }, 1000);
+
 
                         } else if (type.equals("setDevicesInfo")) {
                             JSONObject data = jsonObject.getJSONObject("data");
                             if (data.getBoolean("state")) {
                                 Log.i(TAG, "onDataReceive: state true");
-                                handler.post(new Runnable() {
+                                handler.postDelayed(new Runnable() {
                                     @Override
                                     public void run() {
+                                        setBtnTxt(R.string.config_devices_restart);
                                         saveInfo();
+                                        WaitDialog.dismiss();
+                                        TipDialog.show("配置信息保存成功！", WaitDialog.TYPE.SUCCESS);
                                     }
-                                });
+                                },1000);
+                                isTest = 2;
 
+                                return;
                             }
 
-                            String m = data.getBoolean("state") == true ? "配置成功" : "配置失败";
 
-                            handler.post(new Runnable() {
+                            handler.postDelayed(new Runnable() {
                                 @Override
                                 public void run() {
-                                    Toast.makeText(ConfigActivity.this, m, Toast.LENGTH_SHORT).show();
+                                    WaitDialog.dismiss();
+                                    TipDialog.show("配置信息保存失败！", WaitDialog.TYPE.ERROR);
                                 }
-                            });
+                            },1000);
 
                         }
-
 
 
                     }
@@ -386,8 +410,20 @@ public class ConfigActivity extends BaseActivity {
                     handler.post(new Runnable() {
                         @Override
                         public void run() {
+                            if (isTest == 0){
+                                WaitDialog.dismiss();
+                                TipDialog.show("wifi连接失败！", WaitDialog.TYPE.ERROR);
+                            } else if (isTest == 1) {
+                                WaitDialog.dismiss();
+                                TipDialog.show("配置信息保存失败！", WaitDialog.TYPE.ERROR);
+                            } else if (isTest == -1) {
+
+                                WaitDialog.dismiss();
+                                TipDialog.show("设备连接失败！", WaitDialog.TYPE.ERROR);
+                            }
+                            setConnectState(false);
                             isTest = -1;
-                            Toast.makeText(ConfigActivity.this, "e配置失败", Toast.LENGTH_SHORT).show();
+
                         }
                     });
 
@@ -399,15 +435,6 @@ public class ConfigActivity extends BaseActivity {
 
     }
 
-
-    private void closeLoadDialog(int i){
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                loadDialog.close();
-            }
-        },i);
-    }
 
 
 
@@ -426,7 +453,6 @@ public class ConfigActivity extends BaseActivity {
         response = stringBuilder.toString().trim();
         return response;
     }
-
 
 
     /*

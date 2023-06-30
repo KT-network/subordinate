@@ -6,12 +6,261 @@
     android:orientation="vertical">
 
     <androidx.appcompat.widget.Toolbar
-        android:id="@+id/connect_devices_toolbar"
+        android:id="@+id/login_toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:minHeight="?actionBarSize"
         app:navigationIcon="@drawable/baseline_arrow_back_24"
         app:title="@string/login_name" />
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="150dp"
+        android:orientation="vertical"
+        android:gravity="center">
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@android:drawable/ic_menu_gallery"/>
+
+    </LinearLayout>
+
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:id="@+id/login_login_linear"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:padding="25dp"
+            android:visibility="visible">
+
+            <EditText
+                android:id="@+id/login_edit_account"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:hint="@string/login_account"
+                android:maxLength="10"
+                android:singleLine="true"
+                android:text="841369846"/>
+
+            <EditText
+                android:id="@+id/login_edit_pwd"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:inputType="textPassword"
+                android:maxLength="16"
+                android:singleLine="true"
+                android:text="123456"
+                android:hint="@string/login_pwd" />
+
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="45dp"
+                android:layout_marginTop="25dp"
+                app:cardCornerRadius="22.5dp"
+                app:cardElevation="0dp"
+                app:cardBackgroundColor="@color/purple_500">
+
+                <LinearLayout
+                    android:id="@+id/login_login"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical"
+                    android:gravity="center">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/login_name"
+                        android:textColor="@color/white"
+                        android:textSize="18sp"/>
+                </LinearLayout>
+
+            </androidx.cardview.widget.CardView>
+
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:layout_marginStart="10dp"
+                android:layout_marginEnd="10dp">
+
+                <TextView
+                    android:id="@+id/login_login_go_reg"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:layout_centerInParent="true"
+                    android:padding="5dp"
+                    android:text="@string/login_register"
+                    android:textSize="12sp" />
+                <TextView
+                    android:id="@+id/login_forget_pwd"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/login_forget_pwd"
+                    android:padding="5dp"
+                    android:textSize="12sp"
+                    android:layout_centerInParent="true"
+                    android:layout_alignParentEnd="true"/>
+
+            </RelativeLayout>
+
+        </LinearLayout>
+
+
+        <LinearLayout
+            android:id="@+id/login_reg_linear"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:layout_marginStart="25dp"
+            android:layout_marginEnd="25dp"
+            android:visibility="gone">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:orientation="vertical"
+                android:background="@drawable/register_edit_shape">
+
+                <EditText
+                    android:id="@+id/login_reg_edit_account"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:hint="@string/reg_account"
+                    android:maxLength="10"
+                    android:singleLine="true"
+                    android:background="@null"/>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:orientation="vertical"
+                android:background="@drawable/register_edit_shape"
+                android:layout_marginTop="15dp">
+
+                <EditText
+                    android:id="@+id/login_reg_edit_pwd"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:inputType="textPassword"
+                    android:background="@null"
+                    android:maxLength="16"
+                    android:singleLine="true"
+                    android:hint="@string/reg_pwd"/>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:orientation="vertical"
+                android:layout_marginTop="15dp"
+                android:background="@drawable/register_edit_shape">
+
+                <EditText
+                    android:id="@+id/login_reg_edit_emial"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@null"
+                    android:hint="@string/reg_email"
+                    android:inputType="textEmailAddress"
+                    android:singleLine="true"/>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:orientation="horizontal"
+                android:layout_marginTop="15dp"
+                android:background="@drawable/register_edit_shape">
+                <EditText
+                    android:id="@+id/login_reg_edit_verify"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:background="@null"
+                    android:hint="@string/reg_verify_code"
+                    android:singleLine="true"
+                    android:layout_weight="1"/>
+
+                <TextView
+                    android:id="@+id/reg_get_verify"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/reg_get_verify_code"
+                    android:textColor="@color/purple_500"
+                    android:padding="5dp"
+                    android:layout_marginEnd="10dp"
+                    android:layout_marginStart="15dp"/>
+
+            </LinearLayout>
+
+
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="45dp"
+                android:layout_marginTop="25dp"
+                app:cardCornerRadius="22.5dp"
+                app:cardElevation="0dp"
+                app:cardBackgroundColor="@color/purple_500">
+
+                <LinearLayout
+                    android:id="@+id/login_reg"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical"
+                    android:gravity="center">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/login_reg"
+                        android:textColor="@color/white"
+                        android:textSize="18sp"/>
+                </LinearLayout>
+
+            </androidx.cardview.widget.CardView>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:layout_marginStart="10dp"
+                android:layout_marginEnd="10dp">
+
+                <TextView
+                    android:id="@+id/login_reg_go_login"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:layout_centerInParent="true"
+                    android:padding="5dp"
+                    android:text="@string/reg_login"
+                    android:textSize="12sp" />
+
+            </RelativeLayout>
+
+
+
+
+
+        </LinearLayout>
+
+
+    </RelativeLayout>
+
+
+
+
 
 
 

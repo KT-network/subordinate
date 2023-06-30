@@ -27,12 +27,16 @@ import com.kt.whose.subordinate.Broadcast.BroadcastTag;
 import com.kt.whose.subordinate.Fragment.Main.DevicesFragment;
 import com.kt.whose.subordinate.Fragment.Main.DiscoverFragment;
 import com.kt.whose.subordinate.Fragment.Main.MeFragment;
+import com.kt.whose.subordinate.HttpEntity.Login;
 import com.kt.whose.subordinate.R;
+import com.kt.whose.subordinate.Utils.Preferences;
 import com.kt.whose.subordinate.Utils.mqtt.KsMqttService;
 import com.kt.whose.subordinate.Utils.mqtt.MqttCallBackHandler;
-
+import com.rxjava.rxlife.RxLife;
 
 import nl.joery.animatedbottombar.AnimatedBottomBar;
+import rxhttp.wrapper.param.RxHttp;
+
 
 /*
  *
@@ -58,7 +62,7 @@ public class MainActivity extends BaseActivity {
 
     private KsMqttService mqttService;
 
-//    private LocalBroadcastManager localBroadcastManager;
+    //    private LocalBroadcastManager localBroadcastManager;
 //    private IntentFilter intentFilter;
     private Handler handler;
 
@@ -119,6 +123,7 @@ public class MainActivity extends BaseActivity {
         handler = new Handler(Looper.getMainLooper());
         broadcastFilter();
 
+
     }
 
     @Override
@@ -133,6 +138,8 @@ public class MainActivity extends BaseActivity {
         intentFilter.addAction(BroadcastTag.EXTRA_DATA_TOPIC);
         intentFilter.addAction(BroadcastTag.EXTRA_ERROR_CODE);
         intentFilter.addAction(BroadcastTag.EXTRA_ERROR_MESSAGE);
+        intentFilter.addAction(BroadcastTag.ACTION_LOGIN_STATE);
+//        intentFilter.addAction(BroadcastTag.ACTION_LOGIN_DISCONNECTED);
         localBroadcastManager.registerReceiver(broadcastReceiver, intentFilter);
 
     }
@@ -146,7 +153,6 @@ public class MainActivity extends BaseActivity {
 
         }
     };
-
 
 
     private void TabToFragment(int index) {
@@ -204,12 +210,6 @@ public class MainActivity extends BaseActivity {
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
             mqttService = ((KsMqttService.LocalBinder) iBinder).getService();
-            handler.post(new Runnable() {
-                @Override
-                public void run() {
-                    connectMqtt();
-                }
-            });
         }
 
         @Override
@@ -220,12 +220,12 @@ public class MainActivity extends BaseActivity {
 
     private void connectMqtt() {
 
-        mqttService.setHOST("124.70.108.79");
-        mqttService.setPORT(1883);
-        mqttService.setAutoReconnect(true);
-        mqttService.setDevicesId(devicesId);
-        mqttService.setUSERNAME("public");
-        mqttService.setPASSWORD("123456");
+        String userId = Preferences.getValue("userId", "");
+        mqttService.setHOST("192.168.0.7");
+        mqttService.setPORT(Preferences.getValue("mqtt-port", 1883));
+        mqttService.setDevicesId(userId + "-app");
+        mqttService.setUSERNAME(Preferences.getValue("account", ""));
+        mqttService.setPASSWORD(Preferences.getValue("account_pwd", ""));
         mqttService.connect();
 
     }
@@ -237,25 +237,81 @@ public class MainActivity extends BaseActivity {
             final String action = intent.getAction();
 
             if (BroadcastTag.ACTION_MQTT_DISCONNECTED.equals(action)) {
-                Log.i(TAG, "onReceive: mqtt 断开连接,执行重新连接策略");
+                // mqtt 因网络断开连接执行重新连接
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (mqttService == null) {
+                            connectMqtt();
+                            return;
+                        }
+                        if (!mqttService.isConnected()) {
+                            connectMqtt();
+                        }
 
-                if (!mqttService.getAutoReconnect()) {
+                    }
+                }, 3000);
+                /*if (!mqttService.getAutoReconnect()) {
                     if (mqttService != null) {
                         if (mqttService.isConnected()) {
                             mqttService.disconnect();
                         }
                     }
-                    handler.postDelayed(new Runnable() {
+
+                }*/
+            } else if (BroadcastTag.ACTION_LOGIN_STATE.equals(action)) {
+                if (intent.getBooleanExtra(BroadcastTag.ACTION_LOGIN_STATE, false)) {
+                    // 登录成功后开始连接mqtt
+                    handler.post(new Runnable() {
                         @Override
                         public void run() {
                             connectMqtt();
                         }
-                    }, 5000);
+                    });
+                } else {
+                    // token过期，mqtt断开连接的msg为null
+                    handler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (mqttService != null) {
+                                if (mqttService.isConnected()) {
+                                    mqttService.disconnect();
+                                }
+                            }
+                        }
+                    });
                 }
-            }
+            } /*else if (BroadcastTag.ACTION_LOGIN_DISCONNECTED.equals(action)) {
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (mqttService != null) {
+                            if (mqttService.isConnected()) {
+                                mqttService.disconnect();
+                            }
+                        }
+                    }
+                });
+            }*/
 
         }
     };
+
+    /*private void login() {
+
+        if (Preferences.getValue("account", null) == null) {
+            return;
+        }
+        String account = Preferences.getValue("account", "");
+        String pwd = Preferences.getValue("account_pwd", "");
+        RxHttp.postJson("/user/login").add("user", account).add("pwd", pwd).toObservableResponse(Login.class).to(RxLife.toMain(this)).subscribe(s -> {
+
+            Preferences.setValue("token", s.getToken());
+        }, throwable -> {
+
+        });
+
+    }*/
 
 
     @Override

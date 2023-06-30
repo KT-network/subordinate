@@ -26,7 +26,9 @@ import com.kt.whose.subordinate.Utils.sqlModel.DevicesInfoSql;
 
 import org.litepal.LitePal;
 
-public class DevicesControlActivity extends BaseActivity {
+
+
+public class RgbDevicesControlActivity extends BaseActivity {
 
     private static final String TAG = "DevicesControlActivity";
     Toolbar toolbar;
@@ -83,9 +85,9 @@ public class DevicesControlActivity extends BaseActivity {
         devicesIdText.setText(devicesInfo.getDevicesId());
         devicesNameText.setText(devicesInfo.getName());
 
-
-
         broadcastFilter();
+
+
         /*pixel_screen.setAdapter(new Pixel(10,6));*/
     }
 
@@ -108,6 +110,9 @@ public class DevicesControlActivity extends BaseActivity {
         intentFilter.addAction(BroadcastTag.EXTRA_DATA_MESSAGE);
         intentFilter.addAction(BroadcastTag.EXTRA_DATA_TOPIC);
         localBroadcastManager.registerReceiver(broadcastReceiver, intentFilter);
+
+
+
 
     }
 
@@ -267,5 +272,9 @@ public class DevicesControlActivity extends BaseActivity {
         }
     }
 
-
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        localBroadcastManager.unregisterReceiver(broadcastReceiver);
+    }
 }

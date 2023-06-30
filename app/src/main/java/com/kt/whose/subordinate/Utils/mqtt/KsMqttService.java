@@ -1,7 +1,10 @@
 package com.kt.whose.subordinate.Utils.mqtt;
 
 import android.app.Service;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
@@ -46,6 +49,8 @@ public class KsMqttService extends Service {
     private int keepAliveInterval = 20;
     private boolean autoReconnect = false;
 
+    public boolean loginDisconnected = false;
+
     MqttAsyncClient mqttClient = null;
     DatagramSocket datagramSocket = null;
     private LocalBroadcastManager localBroadcastManager;
@@ -69,9 +74,21 @@ public class KsMqttService extends Service {
         super.onCreate();
 
         localBroadcastManager = LocalBroadcastManager.getInstance(this);
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(BroadcastTag.ACTION_LOGIN_STATE);
+        localBroadcastManager.registerReceiver(broadcastReceiver, intentFilter);
 
     }
 
+    private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            final String action = intent.getAction();
+            if (BroadcastTag.ACTION_LOGIN_STATE.equals(action)) {
+                loginDisconnected = intent.getBooleanExtra(BroadcastTag.ACTION_LOGIN_STATE, false);
+            }
+        }
+    };
 
     public void setHOST(String HOST) {
         this.HOST = HOST;
@@ -105,11 +122,12 @@ public class KsMqttService extends Service {
         this.autoReconnect = autoReconnect;
     }
 
-    public boolean getAutoReconnect(){
+    public boolean getAutoReconnect() {
         return this.autoReconnect;
     }
 
     public void connect() {
+
         MemoryPersistence persistence = new MemoryPersistence();
 
         MqttConnectOptions options = new MqttConnectOptions();
@@ -120,7 +138,7 @@ public class KsMqttService extends Service {
 
         options.setConnectionTimeout(this.connectionTimeout);
         options.setKeepAliveInterval(this.keepAliveInterval);
-        options.setAutomaticReconnect(this.autoReconnect);
+        options.setAutomaticReconnect(false);
 
         try {
 
@@ -139,7 +157,15 @@ public class KsMqttService extends Service {
                     if (cause != null && cause.getCause() != null)
                         message = cause.getCause().getMessage();
                     else message = cause.getMessage();
-                    broadcastUpdate(BroadcastTag.ACTION_MQTT_DISCONNECTED, error_code, message);
+
+                    Log.i(TAG, "onFailure1消息回调监听: " + error_code + message);
+
+                    if (message == null && error_code == 32109) {
+                        broadcastUpdateLoginState(false);
+                    } else {
+                        broadcastUpdate(BroadcastTag.ACTION_MQTT_DISCONNECTED, error_code, message);
+                    }
+
                 }
 
                 @Override
@@ -159,14 +185,12 @@ public class KsMqttService extends Service {
             mqttClient.connect(options, null, new IMqttActionListener() {
                 @Override
                 public void onSuccess(IMqttToken iMqttToken) {
-                    Log.i(TAG, "onSuccess: mqtt连接成功");
+
                     broadcastUpdate(BroadcastTag.ACTION_MQTT_CONNECTED);
                 }
 
                 @Override
                 public void onFailure(IMqttToken iMqttToken, Throwable exception) {
-                    Log.i(TAG, "onSuccess: mqtt连接失败");
-
                     String message = null;
                     int error_code = -1;
                     if (exception != null && exception instanceof MqttException) {
@@ -176,8 +200,12 @@ public class KsMqttService extends Service {
                     if (exception != null && exception.getCause() != null)
                         message = exception.getCause().getMessage();
                     else message = exception.getMessage();
-
-                    broadcastUpdate(BroadcastTag.ACTION_MQTT_DISCONNECTED, error_code, message); //连接失败
+                    Log.i(TAG, "onFailure连接回调: " + error_code + message);
+                    if (message == null && error_code == 32109) {
+                        broadcastUpdateLoginState(false);
+                    } else {
+                        broadcastUpdate(BroadcastTag.ACTION_MQTT_DISCONNECTED, error_code, message); //连接失败
+                    }
 
                 }
             });
@@ -277,6 +305,13 @@ public class KsMqttService extends Service {
 
     void broadcastUpdate(String action) {
         final Intent intent = new Intent(action);
+        localBroadcastManager.sendBroadcast(intent);
+    }
+
+    void broadcastUpdateLoginState(boolean is) {
+
+        Intent intent = new Intent(BroadcastTag.ACTION_LOGIN_STATE);
+        intent.putExtra(BroadcastTag.ACTION_LOGIN_STATE, is);
         localBroadcastManager.sendBroadcast(intent);
     }
 

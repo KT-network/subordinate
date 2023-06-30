@@ -22,8 +22,8 @@
     <string name="connect_devices_state_config">开始配置</string>
     <string name="connect_devices_hint_title">连接提示</string>
     <string name="connect_devices_hint_data">请确保手机已连接设备的wifi热点。</string>
-    
-    
+
+
     <string name="config_devices_title">配置设备</string>
     <string name="config_devices_title_init">初始配置</string>
     <string name="config_devices_title_cloud">远程配置</string>
@@ -33,6 +33,7 @@
     <string name="config_devices_connect_btn">连接到设备</string>
     <string name="config_devices_wifi_connect_btn">wifi连接测试</string>
     <string name="config_devices_save_btn">保存配置</string>
+    <string name="config_devices_restart">重启设备</string>
 
     <string name="config_devices_connect_state">连接状态</string>
     <string name="config_devices_connect_state_true">已连接</string>
@@ -40,10 +41,27 @@
 
 
     <string name="devices_control_title">设备详情</string>
+    // rgb设备详情
+    <string name="devices_control_rgb_extinguish">息屏/亮屏</string>
+    <string name="devices_control_rgb_clear_screen">清屏</string>
+    <string name="devices_control_rgb_program_list">节目列表</string>
+    <string name="devices_control_rgb_program_time">节目时间</string>
 
-
-    <string name="login_name">登录</string>
+    <string name="login_name">登录/注册</string>
+    <string name="login_register">立即注册</string>
+    <string name="login_forget_pwd">忘记密码</string>
+    <string name="login_account">账号</string>
+    <string name="login_pwd">密码</string>
+    <string name="login_login">登录</string>
+    <string name="reg_account">输入账号</string>
+    <string name="reg_pwd">输入密码</string>
+    <string name="reg_email">输入邮箱</string>
+    <string name="reg_verify_code">输入验证码</string>
+    <string name="reg_get_verify_code">获取验证码</string>
+    <string name="login_reg">注册</string>
+    <string name="reg_login">去登录</string>
     
+
     <string-array name="test_add_devices_item_data">
 
         <item>测试设备1</item>
@@ -52,5 +70,22 @@
         <item>测试设备4</item>
 
     </string-array>
+    <string name="title_activity_main2">MainActivity2</string>
+    <!-- Strings used for fragments for navigation -->
+    <string name="first_fragment_label">First Fragment</string>
+    <string name="second_fragment_label">Second Fragment</string>
+    <string name="next">Next</string>
+    <string name="previous">Previous</string>
+
+    <string name="hello_first_fragment">Hello first fragment</string>
+    <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
+
+
+
+
+    <string name="network_error">当前无网络，请检查你的网络设置</string>
+    <string name="notify_no_network">网络连接不可用，请稍后重试！</string>
+    <string name="esky_service_exception">网络不给力，请稍候重试！</string>
+    <string name="time_out_please_try_again_later">连接超时,请稍后再试</string>
 
 </resources>

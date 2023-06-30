@@ -40,6 +40,21 @@ public class BroadcastTag {
     public final static String EXTRA_ERROR_MESSAGE = "com.kt.whose.subordinate.mqtt.EXTRA_ERROR_MESSAGE";
 
 
+    /*
+    * 登录状态（登录成功，以及token失效，mqtt断开连接的msg为空）
+    * */
+    public final static String ACTION_LOGIN_STATE = "com.kt.whose.subordinate.login.ACTION_LOGIN_STATE";
+
+    /*
+     * 登录token过期、在别处登录
+     * */
+    public final static String ACTION_LOGIN_DISCONNECTED = "com.kt.whose.subordinate.login.ACTION_LOGIN_DISCONNECTED";
+
+
+    /*
+     * 登录成功设备数据
+     * */
+    public final static String ACTION_LOGIN_SUCCEED_DEVICES_LIST = "com.kt.whose.subordinate.login.ACTION_LOGIN_SUCCEED_DEVICES_LIST";
 
 
 }

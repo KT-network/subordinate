@@ -2,6 +2,7 @@ package com.kt.whose.subordinate.Adapter;
 
 import android.content.Context;
 import android.os.Handler;
+import android.os.Trace;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,18 +13,25 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.kt.whose.subordinate.Fragment.Main.DevicesFragment;
+import com.kt.whose.subordinate.HttpEntity.Devices;
 import com.kt.whose.subordinate.Interface.ClickListener;
 import com.kt.whose.subordinate.R;
 import com.kt.whose.subordinate.Utils.sqlModel.DevicesInfoSql;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+
+import javax.crypto.spec.DHGenParameterSpec;
 
 public class DevicesMainAdapter extends RecyclerView.Adapter<DevicesMainAdapter.ItemViewHolder> {
 
     private static final String TAG = "DevicesMainAdapter";
 
     private Context mContext;
-    private List<DevicesInfoSql> data;
+//    private List<Devices> data;
     private ClickListener.OnClickListener onClickListener;
     private ClickListener.OnLongClickListener onLongClickListener;
 
@@ -32,6 +40,7 @@ public class DevicesMainAdapter extends RecyclerView.Adapter<DevicesMainAdapter.
 
     public DevicesMainAdapter(Context context) {
         this.mContext = context;
+//        this.data = new ArrayList<>();
     }
 
     @NonNull
@@ -43,17 +52,17 @@ public class DevicesMainAdapter extends RecyclerView.Adapter<DevicesMainAdapter.
 
     @Override
     public void onBindViewHolder(@NonNull DevicesMainAdapter.ItemViewHolder holder, int position) {
-        String name = data.get(position).getName();
-        String picUrl = data.get(position).getPicUrl();
+        String name = DevicesFragment.devicesList.get(position).getName();
+        String picUrl = DevicesFragment.devicesList.get(position).getPicUrl();
         holder.devicesName.setText(name);
-        boolean state = data.get(position).isState();
+        boolean state = DevicesFragment.devicesList.get(position).isState();
         holder.devicesConnectStateIcon.setSelected(state);
 
     }
 
     @Override
     public int getItemCount() {
-        return data == null ? 0 : data.size();
+        return DevicesFragment.devicesList == null ? 0 : DevicesFragment.devicesList.size();
     }
 
     public class ItemViewHolder extends RecyclerView.ViewHolder {
@@ -69,11 +78,11 @@ public class DevicesMainAdapter extends RecyclerView.Adapter<DevicesMainAdapter.
             devicesPic = itemView.findViewById(R.id.item_devices_pic);
             devicesName = itemView.findViewById(R.id.item_devices_name);
 
-            if (clickDevicesInfoListener != null){
+            if (clickDevicesInfoListener != null) {
                 itemView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        clickDevicesInfoListener.onDevicesInfo(data.get(getBindingAdapterPosition()));
+                        clickDevicesInfoListener.onDevicesInfo(DevicesFragment.devicesList.get(getBindingAdapterPosition()));
                     }
                 });
             }
@@ -103,18 +112,26 @@ public class DevicesMainAdapter extends RecyclerView.Adapter<DevicesMainAdapter.
     }
 
 
-    public void setData(List<DevicesInfoSql> data) {
-        if (this.data == null) {
-            this.data = data;
-            notifyDataSetChanged();
-        } else {
-            this.data.addAll(data);
-            notifyItemRangeInserted(getItemCount(), data.size());
-        }
 
+
+
+
+
+
+
+
+
+    // 意外原因断开，初始化所有的item
+    public void setDisconnectedState() {
+        for (Devices devices : DevicesFragment.devicesList) {
+            devices.setNowTime(0);
+            devices.setNowTime(0);
+            devices.setState(false);
+        }
+        notifyDataSetChanged();
     }
 
-    public void notifyItem(DevicesInfoSql infoSql, int index) {
+    public void notifyItem(Devices infoSql, int index) {
 
 //        data.get(index).setState(infoSql.isState());
 
@@ -142,32 +159,32 @@ public class DevicesMainAdapter extends RecyclerView.Adapter<DevicesMainAdapter.
                 while (true) {
                     try {
 
-                        if (data != null) {
+                        if (DevicesFragment.devicesList.size() != 0) {
 
-                            for (int i = 0; i < data.size(); i++) {
-                                DevicesInfoSql devicesInfoSql = data.get(i);
+                            for (int i = 0; i < DevicesFragment.devicesList.size(); i++) {
+                                Devices devices = DevicesFragment.devicesList.get(i);
 
-                                long lastTime = devicesInfoSql.getLastTime();
-                                long nowTime = devicesInfoSql.getNowTime();
+                                long lastTime = devices.getLastTime();
+                                long nowTime = devices.getNowTime();
 
                                 if (lastTime != nowTime && (Math.abs(nowTime - lastTime) < 6 || Math.abs(lastTime - nowTime) < 6)) {
-                                    devicesInfoSql.setLastTime(devicesInfoSql.getNowTime());
-                                    //devicesInfoSql.setNowTime(0);
-                                    //devicesInfoSql.setLastTime(0);
-                                    // devicesInfoSql.setState(true);
+                                    devices.setLastTime(devices.getNowTime());
+                                    //devices.setNowTime(0);
+                                    //devices.setLastTime(0);
+                                    // devices.setState(true);
                                 } else {
-//                                    Log.i(TAG, "id: "+devicesInfoSql.getDevicesId());
+//                                    Log.i(TAG, "id: "+devices.getDevicesId());
 //                                    Log.i(TAG, "last: "+lastTime);
 //                                    Log.i(TAG, "now: "+nowTime);
-                                    devicesInfoSql.setState(false);
-                                    devicesDisConnectedListener.onDevicesId(devicesInfoSql.getDevicesId());
+                                    devices.setState(false);
+                                    devicesDisConnectedListener.onDevicesId(devices.getDevicesId());
                                 }
 
                                 int finalI = i;
                                 handler.post(new Runnable() {
                                     @Override
                                     public void run() {
-                                        notifyItem(devicesInfoSql, finalI);
+                                        notifyItem(devices, finalI);
                                     }
                                 });
 
@@ -198,11 +215,12 @@ public class DevicesMainAdapter extends RecyclerView.Adapter<DevicesMainAdapter.
 
 
     private ClickDevicesInfoListener clickDevicesInfoListener;
-    public interface ClickDevicesInfoListener{
-        void onDevicesInfo(DevicesInfoSql devicesInfoSql);
+
+    public interface ClickDevicesInfoListener {
+        void onDevicesInfo(Devices devicesInfoSql);
     }
 
-    public void setClickDevicesInfoListener(ClickDevicesInfoListener clickDevicesInfoListener){
+    public void setClickDevicesInfoListener(ClickDevicesInfoListener clickDevicesInfoListener) {
         this.clickDevicesInfoListener = clickDevicesInfoListener;
     }
 

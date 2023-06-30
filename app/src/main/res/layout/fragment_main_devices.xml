@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    android:layout_height="match_parent">
 
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -12,16 +13,24 @@
         android:layout_gravity="end|bottom"
         android:layout_margin="15dp"
         android:src="@drawable/ic_baseline_add_24"
-        app:elevation="3dp"
-        app:fabSize="auto"
-        app:backgroundTint="@color/purple_500"
         android:tint="@color/white"
-        />
+        app:backgroundTint="@color/purple_500"
+        app:elevation="3dp"
+        app:fabSize="auto" />
 
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/devices_recycler"
+    <com.scwang.smart.refresh.layout.SmartRefreshLayout
+        android:id="@+id/devices_smartRefreshLayout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/devices_recycler"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+    </com.scwang.smart.refresh.layout.SmartRefreshLayout>
+
+
 
 </FrameLayout>

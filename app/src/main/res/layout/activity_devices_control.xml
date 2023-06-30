@@ -167,13 +167,135 @@
 
         </androidx.cardview.widget.CardView>
 
-
-        <com.alespero.expandablecardview.ExpandableCardView
+        <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="60dp"
-            android:layout_margin="10dp"/>
+            app:cardCornerRadius="8dp"
+            app:cardElevation="3dp"
+            android:layout_margin="7.5dp">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/devices_control_rgb_extinguish"
+                    android:textColor="@color/black"
+                    android:textSize="16sp"
+                    android:layout_centerVertical="true"
+                    android:layout_marginStart="15dp"/>
+                <ImageView
+                    android:id="@+id/devices_switch"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:src="@drawable/devices_switch_selector"
+                    android:layout_centerVertical="true"
+                    android:layout_alignParentEnd="true"
+                    android:layout_marginEnd="15dp"/>
 
 
+            </RelativeLayout>
+
+        </androidx.cardview.widget.CardView>
+
+
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="8dp"
+            app:cardElevation="3dp"
+            android:layout_margin="7.5dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+                <RelativeLayout
+                    android:id="@+id/devices_control_cls"
+                    android:layout_width="match_parent"
+                    android:layout_height="55dp">
+
+                    <TextView
+                        android:id="@+id/zdyqp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/devices_control_rgb_clear_screen"
+                        android:textColor="@color/black"
+                        android:textSize="16sp"
+                        android:layout_centerVertical="true"
+                        android:layout_marginStart="15dp"/>
+
+
+                    <ImageView
+                        android:id="@+id/devices_control_cls_help"
+                        android:layout_width="15dp"
+                        android:layout_height="15dp"
+                        android:src="@drawable/baseline_help_24"
+                        android:layout_toEndOf="@id/zdyqp"
+                        android:layout_centerVertical="true"
+                        android:layout_marginStart="5dp"/>
+
+                    <androidx.cardview.widget.CardView
+                        android:id="@+id/devices_control_cls_select_color"
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"
+                        app:cardCornerRadius="15dp"
+                        android:backgroundTint="@color/black"
+                        android:layout_centerVertical="true"
+                        android:layout_alignParentEnd="true"
+                        android:layout_marginEnd="15dp"/>
+
+
+                </RelativeLayout>
+
+                <RelativeLayout
+                    android:id="@+id/devices_control_program_list"
+                    android:layout_width="match_parent"
+                    android:layout_height="55dp">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/devices_control_rgb_program_list"
+                        android:textColor="@color/black"
+                        android:textSize="16sp"
+                        android:layout_centerVertical="true"
+                        android:layout_marginStart="15dp"/>
+
+                    <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:src="@drawable/baseline_chevron_right_24"
+                        android:layout_centerVertical="true"
+                        android:layout_alignParentEnd="true"
+                        android:layout_marginEnd="15dp"/>
+                </RelativeLayout>
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="55dp">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/devices_control_rgb_program_time"
+                        android:textColor="@color/black"
+                        android:textSize="16sp"
+                        android:layout_centerVertical="true"
+                        android:layout_marginStart="15dp"/>
+
+                    <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:src="@drawable/baseline_chevron_right_24"
+                        android:layout_centerVertical="true"
+                        android:layout_alignParentEnd="true"
+                        android:layout_marginEnd="15dp"/>
+                </RelativeLayout>
+
+
+
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
 
     </LinearLayout>
 
