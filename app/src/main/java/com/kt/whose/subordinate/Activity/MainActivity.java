@@ -23,6 +23,7 @@ import android.os.Looper;
 import android.util.Log;
 import android.widget.FrameLayout;
 
+import com.kt.whose.subordinate.BaseApplication;
 import com.kt.whose.subordinate.Broadcast.BroadcastTag;
 import com.kt.whose.subordinate.Fragment.Main.DevicesFragment;
 import com.kt.whose.subordinate.Fragment.Main.DiscoverFragment;
@@ -60,7 +61,7 @@ public class MainActivity extends BaseActivity {
     DiscoverFragment mDiscoverFragment;
     MeFragment mMeFragment;
 
-    private KsMqttService mqttService;
+//    private KsMqttService mqttService;
 
     //    private LocalBroadcastManager localBroadcastManager;
 //    private IntentFilter intentFilter;
@@ -107,7 +108,8 @@ public class MainActivity extends BaseActivity {
         Intent intent = new Intent(this, KsMqttService.class);
 
         startService(intent);
-        bindService(intent, mqttServiceConnection, BIND_AUTO_CREATE);
+
+//        bindService(intent, mqttServiceConnection, BIND_AUTO_CREATE);
 
         /*localBroadcastManager = LocalBroadcastManager.getInstance(this);
         intentFilter = new IntentFilter();
@@ -122,6 +124,7 @@ public class MainActivity extends BaseActivity {
 
         handler = new Handler(Looper.getMainLooper());
         broadcastFilter();
+        bindService();
 
 
     }
@@ -206,7 +209,7 @@ public class MainActivity extends BaseActivity {
     };
 
 
-    private final ServiceConnection mqttServiceConnection = new ServiceConnection() {
+    /*private final ServiceConnection mqttServiceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
             mqttService = ((KsMqttService.LocalBinder) iBinder).getService();
@@ -216,14 +219,14 @@ public class MainActivity extends BaseActivity {
         public void onServiceDisconnected(ComponentName componentName) {
             //mqttService = null;
         }
-    };
+    };*/
 
     private void connectMqtt() {
 
-        String userId = Preferences.getValue("userId", "");
-        mqttService.setHOST("192.168.0.7");
+
+        mqttService.setHOST(Preferences.getValue("mqtt-host","")/*"192.168.0.7"*/);
         mqttService.setPORT(Preferences.getValue("mqtt-port", 1883));
-        mqttService.setDevicesId(userId + "-app");
+        mqttService.setDevicesId(BaseApplication.getUserId() + "-app");
         mqttService.setUSERNAME(Preferences.getValue("account", ""));
         mqttService.setPASSWORD(Preferences.getValue("account_pwd", ""));
         mqttService.connect();
@@ -250,7 +253,7 @@ public class MainActivity extends BaseActivity {
                         }
 
                     }
-                }, 3000);
+                }, 1000);
                 /*if (!mqttService.getAutoReconnect()) {
                     if (mqttService != null) {
                         if (mqttService.isConnected()) {
@@ -273,6 +276,7 @@ public class MainActivity extends BaseActivity {
                     handler.post(new Runnable() {
                         @Override
                         public void run() {
+                            BaseApplication.setToken(null);
                             if (mqttService != null) {
                                 if (mqttService.isConnected()) {
                                     mqttService.disconnect();
@@ -281,18 +285,7 @@ public class MainActivity extends BaseActivity {
                         }
                     });
                 }
-            } /*else if (BroadcastTag.ACTION_LOGIN_DISCONNECTED.equals(action)) {
-                handler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (mqttService != null) {
-                            if (mqttService.isConnected()) {
-                                mqttService.disconnect();
-                            }
-                        }
-                    }
-                });
-            }*/
+            }
 
         }
     };
@@ -316,10 +309,10 @@ public class MainActivity extends BaseActivity {
 
     @Override
     protected void onDestroy() {
+        super.onDestroy();
         localBroadcastManager.unregisterReceiver(broadcastReceiver);
         Intent intent = new Intent(MainActivity.this, KsMqttService.class);
         stopService(intent);
-        unbindService(mqttServiceConnection);
-        super.onDestroy();
+
     }
 }

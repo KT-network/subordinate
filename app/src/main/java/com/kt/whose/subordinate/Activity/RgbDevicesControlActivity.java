@@ -1,17 +1,24 @@
 package com.kt.whose.subordinate.Activity;
 
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.graphics.Rect;
+import android.os.IBinder;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.BaseAdapter;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
+import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -19,16 +26,32 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.kongzue.dialogx.DialogX;
+import com.kongzue.dialogx.dialogs.BottomDialog;
+import com.kongzue.dialogx.dialogs.InputDialog;
+import com.kongzue.dialogx.dialogs.MessageDialog;
+import com.kongzue.dialogx.dialogs.PopTip;
+import com.kongzue.dialogx.interfaces.OnBindView;
+import com.kongzue.dialogx.interfaces.OnDialogButtonClickListener;
+import com.kongzue.dialogx.interfaces.OnInputDialogButtonClickListener;
 import com.kt.whose.subordinate.Broadcast.BroadcastTag;
+import com.kt.whose.subordinate.HttpEntity.Devices;
+import com.kt.whose.subordinate.HttpEntity.DevicesType;
+import com.kt.whose.subordinate.HttpEntity.Msg;
 import com.kt.whose.subordinate.R;
+import com.kt.whose.subordinate.Utils.Preferences;
+import com.kt.whose.subordinate.Utils.SocketDataBase;
 import com.kt.whose.subordinate.Utils.Tool;
+import com.kt.whose.subordinate.Utils.mqtt.KsMqttService;
 import com.kt.whose.subordinate.Utils.sqlModel.DevicesInfoSql;
+import com.rxjava.rxlife.RxLife;
 
 import org.litepal.LitePal;
 
+import rxhttp.wrapper.param.RxHttp;
 
 
-public class RgbDevicesControlActivity extends BaseActivity {
+public class RgbDevicesControlActivity extends BaseActivity implements View.OnClickListener {
 
     private static final String TAG = "DevicesControlActivity";
     Toolbar toolbar;
@@ -36,13 +59,14 @@ public class RgbDevicesControlActivity extends BaseActivity {
 
     GridLayoutManager gridLayoutManager;
 
-    ImageView connectStateImage;
+    ImageView connectStateImage, editName;
     TextView devicesNameText, devicesIdText;
 
+    RelativeLayout editNetwork;
 
-    //GridView pixel_screen;
+    private Devices devices;
 
-    private DevicesInfoSql devicesInfo;
+    private String topic;
 
     @Override
     public int initLayoutId() {
@@ -54,41 +78,31 @@ public class RgbDevicesControlActivity extends BaseActivity {
         toolbar = findViewById(R.id.devices_control_toolbar);
         toolbar.setOnClickListener(toolBarOnClickListener);
 
+        editName = findViewById(R.id.devices_control_edit_name);
+        editName.setOnClickListener(this);
         connectStateImage = findViewById(R.id.devices_control_connect_state);
         devicesNameText = findViewById(R.id.devices_control_name);
         devicesIdText = findViewById(R.id.devices_control_id);
 
-        /*pixel_screen = findViewById(R.id.devices_control_pixel_screen);
-        pixel_screen.setNumColumns(10);*/
-        /*pixel_screen = findViewById(R.id.devices_control_pixel_screen);
-
-        gridLayoutManager = new GridLayoutManager(this,29);
-
-        pixel_screen.setLayoutManager(gridLayoutManager);
-//        pixel_screen.addItemDecoration(new DividerItemDecoration(this,DividerItemDecoration.VERTICAL));
-
-        pixel_screen.setAdapter(new PixelAdapter(29,21));
-        pixel_screen.addItemDecoration(new GridSpaceItemDecoration(29,10,10));*/
-
-
+        editNetwork = findViewById(R.id.devices_control_edit_network);
+        editNetwork.setOnClickListener(this);
     }
 
     @Override
     protected void initEvent() {
-
         Intent intent = getIntent();
+        Devices s = (Devices) intent.getSerializableExtra("info");
+        if (s != null) {
+            devices = s;
+            devicesIdText.setText(devices.getDevicesId());
+            devicesNameText.setText(devices.getName());
+            topic = "ks/subordinate/" + Preferences.getValue("userId", "") + "/" + devices.getDevicesId() + "/action";
+        }
 
-        long id = intent.getLongExtra("info",0);
 
-        devicesInfo = LitePal.find(DevicesInfoSql.class, id);
-
-        devicesIdText.setText(devicesInfo.getDevicesId());
-        devicesNameText.setText(devicesInfo.getName());
-
+        bindService();
         broadcastFilter();
 
-
-        /*pixel_screen.setAdapter(new Pixel(10,6));*/
     }
 
     // toolbar 退出
@@ -112,8 +126,6 @@ public class RgbDevicesControlActivity extends BaseActivity {
         localBroadcastManager.registerReceiver(broadcastReceiver, intentFilter);
 
 
-
-
     }
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
@@ -125,12 +137,12 @@ public class RgbDevicesControlActivity extends BaseActivity {
                 connectStateImage.setSelected(false);
             } else if (BroadcastTag.ACTION_DEVICES_DISCONNECTED.equals(action)) {
 
-                if (intent.getStringExtra(BroadcastTag.ACTION_DEVICES_DISCONNECTED).equals(devicesInfo.getDevicesId())){
+                if (intent.getStringExtra(BroadcastTag.ACTION_DEVICES_DISCONNECTED).equals(devices.getDevicesId())) {
                     connectStateImage.setSelected(false);
                 }
             } else if (BroadcastTag.ACTION_DEVICES_CONNECTED.equals(action)) {
 
-                if (intent.getStringExtra(BroadcastTag.ACTION_DEVICES_CONNECTED).equals(devicesInfo.getDevicesId())){
+                if (intent.getStringExtra(BroadcastTag.ACTION_DEVICES_CONNECTED).equals(devices.getDevicesId())) {
                     connectStateImage.setSelected(true);
                 }
             }
@@ -138,143 +150,175 @@ public class RgbDevicesControlActivity extends BaseActivity {
     };
 
 
+    private void editNameHttp(String s) {
 
+        RxHttp.postJson("/devices/edit/name")
+                .add("id", devices.getId())
+                .add("name", s)
+                .toObservableResponse(String.class)
+                .to(RxLife.toMain(this))
+                .subscribe(r -> {
+                    PopTip.show(r).iconSuccess();
+                    devicesNameText.setText(s);
 
+                }, e -> {
+                    int code = Tool.ErrorInfo(e);
+                    if (code == 6) {
+                        broadcastUpdateLoginState(false);
+                    }
 
-    // =======================================================================================================================================
+                });
+    }
 
+    @Override
+    public void onClick(View view) {
 
-    private class Pixel extends BaseAdapter {
+        if (view == editName) {
+            new InputDialog("修改设备名称", null, "修改", "取消", devices.getName())
+                    .setCancelable(false)
+                    .setOkButton(new OnInputDialogButtonClickListener<InputDialog>() {
+                        @Override
+                        public boolean onClick(InputDialog dialog, View v, String inputStr) {
+                            editNameHttp(inputStr);
+                            return false;
+                        }
+                    }).show();
+        } else if (view == editNetwork) {
 
-        private int width;
-        private int height;
+            clickEditNetwork();
 
-        public Pixel(int width, int height) {
-            this.width = width;
-            this.height = height;
         }
 
-        @Override
-        public int getCount() {
-            return width * height;
-        }
-
-        @Override
-        public Object getItem(int i) {
-            return i;
-        }
-
-        @Override
-        public long getItemId(int i) {
-            return i;
-        }
-
-        @Override
-        public View getView(int i, View view, ViewGroup viewGroup) {
+    }
 
 
-            LayoutInflater inflater = LayoutInflater.from(viewGroup.getContext());
+    private void clickEditNetwork() {
+        BottomDialog.show(new OnBindView<BottomDialog>(R.layout.layout_devices_edit_network) {
+            @Override
+            public void onBind(BottomDialog dialogBottom, View v) {
 
-            if (view == null) {
-                view = inflater.inflate(R.layout.item_pixel, viewGroup, false);
+                TextView commit = v.findViewById(R.id.edit_network_commit);
+                EditText ssid = v.findViewById(R.id.edit_network_ssid);
+                EditText pwd = v.findViewById(R.id.edit_network_pwd);
+                EditText ip = v.findViewById(R.id.edit_network_ip);
+                EditText gateway = v.findViewById(R.id.edit_network_gateway);
+                CheckBox staticIp = v.findViewById(R.id.edit_network_static);
+                CheckBox restart = v.findViewById(R.id.edit_network_restart);
 
-                AbsListView.LayoutParams param = new AbsListView.LayoutParams(getItemWidth(width), getItemHeight(height));
-                view.setLayoutParams(param);
+                staticIp.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                    @Override
+                    public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                        if (b) {
+                            ip.setVisibility(View.VISIBLE);
+                            gateway.setVisibility(View.VISIBLE);
+                        } else {
+                            ip.setVisibility(View.GONE);
+                            gateway.setVisibility(View.GONE);
+                        }
+
+                    }
+                });
+
+                commit.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        String msg = "";
+                        if (staticIp.isChecked()) {
+                            String ssids = ssid.getText().toString();
+                            String pwds = pwd.getText().toString();
+                            String ips = ip.getText().toString();
+                            String g = gateway.getText().toString();
+
+                            if (ssids.length() == 0 || pwds.length() == 0 || ips.length() == 0 || g.length() == 0) {
+                                PopTip.show("请输入完整").iconWarning();
+                                return;
+                            }
+                            msg = ssids + "\n" + pwds + "\n" + ips + "\n" + g;
+
+                        } else {
+                            String ssids = ssid.getText().toString();
+                            String pwds = pwd.getText().toString();
+                            if (ssids.length() == 0 || pwds.length() == 0) {
+                                PopTip.show("请输入完整").iconWarning();
+                                return;
+                            }
+                            msg = ssids + "\n" + pwds;
+                        }
+                        MessageDialog.show("配置网络", "你确定要提交新的网络信息吗？\n" + msg, "提交", "取消")
+                                .setOkButton(new OnDialogButtonClickListener<MessageDialog>() {
+                                    @Override
+                                    public boolean onClick(MessageDialog dialog, View v) {
+
+                                        if (mqttService.isConnected()) {
+                                            String s = "";
+                                            if (staticIp.isChecked()){
+                                                s = SocketDataBase.editNetwork(
+                                                        1,
+                                                        ssid.getText().toString(),
+                                                        pwd.getText().toString(),
+                                                        ip.getText().toString(),
+                                                        "255.255.255.0",
+                                                        gateway.getText().toString(),
+                                                        restart.isChecked()?1:0);
+                                            }else {
+                                                s = SocketDataBase.editNetwork(
+                                                        1,
+                                                        ssid.getText().toString(),
+                                                        pwd.getText().toString(),
+                                                        "0.0.0.0",
+                                                        "255.255.255.0",
+                                                        "0.0.0.0",
+                                                        restart.isChecked()?1:0);
+                                            }
+
+                                            mqttService.publish(topic,s);
+                                            PopTip.show("提交成功").iconSuccess();
+                                            dialogBottom.dismiss();
+                                        }
+
+                                        return false;
+                                    }
+                                });
+
+
+                    }
+                });
+
+
             }
-
-            return view;
-        }
-    }
-
-    private int getItemWidth(int i) {
-
-        int width = px2dip(getApplicationContext(), Tool.getWidth(getApplicationContext()));
-        int re = width - (45 * 2) - i;
-
-        return dip2px(getApplicationContext(), (re / i) * 2);
-    }
-
-    private int getItemHeight(int i) {
-        int height = 210 - 100;
-
-        return dip2px(getApplicationContext(), height / i);
-
+        }).setAllowInterceptTouch(false);
     }
 
 
     /*
-     *
-     * 根据手机的分辨率从 dp 的单位 转成为 px(像素)
-     * */
-    public static int dip2px(Context context, float dpValue) {
-        final float scale = context.getResources().getDisplayMetrics().density;
-        return (int) (dpValue * scale + 0.5f);
-    }
+     * service
+     * *//*
+    private final ServiceConnection mqttServiceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+            mqttService = ((KsMqttService.LocalBinder) iBinder).getService();
 
-
-    /*
-     * 根据手机的分辨率从 px(像素) 的单位 转成为 dp
-     * */
-    public static int px2dip(Context context, float pxValue) {
-        final float scale = context.getResources().getDisplayMetrics().density;
-        return (int) (pxValue / scale + 0.5f);
-    }
-
-
-    /**
-     * 描述 : RecyclerView GridLayoutManager 等间距。
-     * <p>
-     * 等间距需满足两个条件：
-     * 1.各个模块的大小相等，即 各列的left+right 值相等；
-     * 2.各列的间距相等，即 前列的right + 后列的left = 列间距；
-     * <p>
-     * 在{@link #getItemOffsets(Rect, View, RecyclerView, RecyclerView.State)} 中针对 outRect 的left 和right 满足这两个条件即可
-     * <p>
-     * 作者 : shiguotao
-     * 版本 : V1
-     * 创建时间 : 2020/3/19 4:54 PM
-     */
-    public class GridSpaceItemDecoration extends RecyclerView.ItemDecoration {
-
-        private final String TAG = "GridSpaceItemDecoration";
-
-        private int mSpanCount;//横条目数量
-        private int mRowSpacing;//行间距
-        private int mColumnSpacing;// 列间距
-
-        /**
-         * @param spanCount     列数
-         * @param rowSpacing    行间距
-         * @param columnSpacing 列间距
-         */
-        public GridSpaceItemDecoration(int spanCount, int rowSpacing, int columnSpacing) {
-            this.mSpanCount = spanCount;
-            this.mRowSpacing = rowSpacing;
-            this.mColumnSpacing = columnSpacing;
         }
 
         @Override
-        public void getItemOffsets(@NonNull Rect outRect, @NonNull View view, @NonNull RecyclerView parent, @NonNull RecyclerView.State state) {
-            int position = parent.getChildAdapterPosition(view); // 获取view 在adapter中的位置。
-            int column = position % mSpanCount; // view 所在的列
-
-            outRect.left = column * mColumnSpacing / mSpanCount; // column * (列间距 * (1f / 列数))
-            outRect.right = mColumnSpacing - (column + 1) * mColumnSpacing / mSpanCount; // 列间距 - (column + 1) * (列间距 * (1f /列数))
-
-            Log.e(TAG, "position:" + position
-                    + "    columnIndex: " + column
-                    + "    left,right ->" + outRect.left + "," + outRect.right);
-
-            // 如果position > 行数，说明不是在第一行，则不指定行高，其他行的上间距为 top=mRowSpacing
-            if (position >= mSpanCount) {
-                outRect.top = mRowSpacing; // item top
-            }
+        public void onServiceDisconnected(ComponentName componentName) {
+            Log.i(TAG, "onServiceDisconnected: componentName");
         }
+    };*/
+
+
+    void broadcastUpdateLoginState(boolean is) {
+        Intent intent = new Intent(BroadcastTag.ACTION_LOGIN_STATE);
+        intent.putExtra(BroadcastTag.ACTION_LOGIN_STATE, is);
+        localBroadcastManager.sendBroadcast(intent);
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
         localBroadcastManager.unregisterReceiver(broadcastReceiver);
+
     }
+
+
 }

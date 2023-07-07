@@ -78,23 +78,23 @@ public class DevicesMainAdapter extends RecyclerView.Adapter<DevicesMainAdapter.
             devicesPic = itemView.findViewById(R.id.item_devices_pic);
             devicesName = itemView.findViewById(R.id.item_devices_name);
 
-            if (clickDevicesInfoListener != null) {
+            /*if (clickDevicesInfoListener != null) {
                 itemView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
                         clickDevicesInfoListener.onDevicesInfo(DevicesFragment.devicesList.get(getBindingAdapterPosition()));
                     }
                 });
-            }
+            }*/
 
-            /*if (onClickListener != null) {
+            if (onClickListener != null) {
                 itemView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
                         onClickListener.onClick(getBindingAdapterPosition());
                     }
                 });
-            }*/
+            }
 
             if (onLongClickListener != null) {
 

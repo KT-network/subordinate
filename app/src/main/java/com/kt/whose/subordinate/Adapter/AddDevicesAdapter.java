@@ -85,11 +85,6 @@ public class AddDevicesAdapter extends RecyclerView.Adapter<AddDevicesAdapter.It
         notifyDataSetChanged();
     }
 
-    public void upDate(List<DevicesType> data){
-
-
-
-    }
 
 
 }

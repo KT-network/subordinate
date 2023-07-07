@@ -1,7 +1,6 @@
 package com.kt.whose.subordinate.Activity;
 
 import android.content.Intent;
-import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.view.View;
@@ -12,23 +11,18 @@ import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.kongzue.dialogx.dialogs.PopTip;
-import com.kt.whose.subordinate.Activity.ConnectDevicesActivity;
 import com.kt.whose.subordinate.Adapter.AddDevicesAdapter;
 import com.kt.whose.subordinate.BaseApplication;
 import com.kt.whose.subordinate.Broadcast.BroadcastTag;
-import com.kt.whose.subordinate.HttpEntity.DevicesList;
 import com.kt.whose.subordinate.HttpEntity.DevicesType;
 import com.kt.whose.subordinate.HttpEntity.DevicesTypeList;
 import com.kt.whose.subordinate.Interface.ClickListener;
 import com.kt.whose.subordinate.R;
-import com.kt.whose.subordinate.RefreshStyle.RefreshLottieHeader;
-import com.kt.whose.subordinate.Utils.Preferences;
+import com.kt.whose.subordinate.ExtendView.RefreshLottieHeader;
 import com.kt.whose.subordinate.Utils.Tool;
 import com.rxjava.rxlife.RxLife;
 import com.scwang.smart.refresh.layout.SmartRefreshLayout;
@@ -37,10 +31,9 @@ import com.scwang.smart.refresh.layout.listener.OnRefreshListener;
 
 import androidx.appcompat.widget.Toolbar;
 
-import java.util.ArrayList;
 import java.util.List;
-
 import rxhttp.wrapper.param.RxHttp;
+
 
 public class AddDevicesActivity extends BaseActivity {
 
@@ -100,13 +93,15 @@ public class AddDevicesActivity extends BaseActivity {
 
 
     private void getDevicesType() {
+        Log.i(TAG, "getDevicesType: "+BaseApplication.getToken());
+
         if (BaseApplication.getToken() == null){
             finishRefresh(500);
+            PopTip.show("登录已过期").iconWarning();
             return;
         }
 
         RxHttp.postJson("/devices/type/list")
-                .addHeader("UserToken", BaseApplication.getToken())
                 .toObservableResponse(DevicesTypeList.class)
                 .to(RxLife.toMain(this))
                 .subscribe(s -> {
@@ -123,7 +118,6 @@ public class AddDevicesActivity extends BaseActivity {
     }
 
     private void refreshDataDispose(List<DevicesType> devices) {
-
 
         if (devices == null || devices.size() == 0){
             return;
@@ -159,8 +153,12 @@ public class AddDevicesActivity extends BaseActivity {
     private ClickListener.OnClickListener onClickListener = new ClickListener.OnClickListener() {
         @Override
         public void onClick(int i) {
+            DevicesType devicesType = devicesTypeList.get(i);
+            Log.i(TAG, "onClick: "+devicesType.getType());
             Intent intent = new Intent(getApplicationContext(), ConnectDevicesActivity.class);
-            intentActivityResultLauncher.launch(intent);
+            intent.putExtra("devicesType",devicesType);
+            startActivity(intent);
+
         }
     };
 

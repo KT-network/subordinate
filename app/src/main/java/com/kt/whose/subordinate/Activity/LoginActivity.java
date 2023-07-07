@@ -132,6 +132,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
         }
         WaitDialog.show("发送中...");
         RxHttp.postJson("/user/register/verifyCode")
+                .setAssemblyEnabled(false)
                 .connectTimeout(30000)
                 .readTimeout(30000)
                 .writeTimeout(30000)
@@ -172,6 +173,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
         }
         WaitDialog.show("注册中...");
         RxHttp.postJson("/user/register")
+                .setAssemblyEnabled(false)
                 .add("user", account)
                 .add("pwd", pwd)
                 .add("email", email)
@@ -181,11 +183,12 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                 .subscribe(s -> {
                     loadSucceed("注册成功");
                     broadcastUpdateLoginState(true);
-                    String md5 = Tool.md5(account+"-"+pwd);
-                    Preferences.setValue("userId",md5);
-                    Preferences.setValue("account",account);
-                    Preferences.setValue("account_pwd",pwd);
+                    /*String md5 = Tool.md5(account+"-"+pwd);
+                    Preferences.setValue("userId",md5);*/
+                    Preferences.setValue("account", account);
+                    Preferences.setValue("account_pwd", pwd);
                     BaseApplication.setToken(s.getToken());
+                    BaseApplication.setUserId(Tool.md5(account + "-ks"));
                 }, e -> {
                     loadError(e.getMessage());
                 });
@@ -207,6 +210,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
 
         WaitDialog.show("登录中...");
         RxHttp.postJson("/user/login")
+                .setAssemblyEnabled(false)
                 .add("user", account)
                 .add("pwd", pwd)
                 .toObservableResponse(Login.class)
@@ -216,10 +220,11 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                     BaseApplication.setToken(s.getToken());
                     broadcastUpdateLoginState(true);
                     broadcastUpdateLoginData(s.getDevices());
-                    String md5 = Tool.md5(account+"-"+pwd);
-                    Preferences.setValue("userId",md5);
-                    Preferences.setValue("account",account);
-                    Preferences.setValue("account_pwd",pwd);
+                    BaseApplication.setUserId(Tool.md5(account + "-ks"));
+                    /*String md5 = Tool.md5(account+"-"+pwd);
+                    Preferences.setValue("userId",md5);*/
+                    Preferences.setValue("account", account);
+                    Preferences.setValue("account_pwd", pwd);
                 }, throwable -> {
                     loadError(throwable.getMessage());
                 });
@@ -237,7 +242,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
     }
 
 
-    private CountDownTimer djs = new CountDownTimer(120000,1080) {
+    private CountDownTimer djs = new CountDownTimer(120000, 1080) {
         @Override
         public void onTick(long l) {
             reg_get_verify.setEnabled(false);
@@ -253,8 +258,8 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
 
 
     /*
-    * 登录成功后数据广播
-    * */
+     * 登录成功后数据广播
+     * */
     void broadcastUpdateLoginData(List<Devices> devices) {
         Intent intent = new Intent(BroadcastTag.ACTION_LOGIN_SUCCEED_DEVICES_LIST);
         intent.putExtra(BroadcastTag.ACTION_LOGIN_SUCCEED_DEVICES_LIST, (Serializable) devices);
@@ -262,14 +267,13 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
     }
 
     /*
-    * 登录状态
-    * */
+     * 登录状态
+     * */
     void broadcastUpdateLoginState(boolean is) {
         Intent intent = new Intent(BroadcastTag.ACTION_LOGIN_STATE);
         intent.putExtra(BroadcastTag.ACTION_LOGIN_STATE, is);
         localBroadcastManager.sendBroadcast(intent);
     }
-
 
 
 }

@@ -28,6 +28,14 @@ public class ResponseParser<T> extends TypeParser<T> {
         Response<T> data = Converter.convertTo(response, Response.class, types);
 
         T t = data.getData();
+
+        if (data.getCode() == 200 && t == null){
+            // .toObservableResponse(String.class)
+            // 服务器返回提示信息
+            //{"code": 200, "msg": "成功", "data": null, "beFrom": "Ks", "time": "2023-07-03 14:18:19"}
+            t = (T) data.getMsg();
+        }
+
         if (t == String.class && types[0] == String.class) {
             t = (T) data.getMsg();
         }

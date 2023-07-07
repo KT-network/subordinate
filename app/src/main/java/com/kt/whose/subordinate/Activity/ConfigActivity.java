@@ -1,11 +1,14 @@
 package com.kt.whose.subordinate.Activity;
 
+import static com.kt.whose.subordinate.Utils.SocketDataBase.getHandshakeData;
+
 import android.animation.TimeAnimator;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.os.Handler;
 import android.util.Log;
 import android.view.View;
@@ -21,16 +24,25 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.bumptech.glide.Glide;
+import com.kongzue.dialogx.dialogs.MessageDialog;
+import com.kongzue.dialogx.dialogs.PopTip;
 import com.kongzue.dialogx.dialogs.TipDialog;
 import com.kongzue.dialogx.dialogs.WaitDialog;
+import com.kongzue.dialogx.interfaces.OnBindView;
+import com.kt.whose.subordinate.BaseApplication;
 import com.kt.whose.subordinate.Broadcast.BroadcastTag;
+import com.kt.whose.subordinate.HttpEntity.DevicesType;
+import com.kt.whose.subordinate.HttpEntity.Msg;
 import com.kt.whose.subordinate.Interface.SocketClientListener;
 import com.kt.whose.subordinate.R;
 import com.kt.whose.subordinate.Utils.LoadDialog;
+import com.kt.whose.subordinate.Utils.Preferences;
 import com.kt.whose.subordinate.Utils.SocketClient;
 import com.kt.whose.subordinate.Utils.SocketDataBase;
 import com.kt.whose.subordinate.Utils.Tool;
 import com.kt.whose.subordinate.Utils.sqlModel.DevicesInfoSql;
+import com.rxjava.rxlife.RxLife;
 
 
 import org.json.JSONException;
@@ -43,6 +55,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+
+import rxhttp.wrapper.param.RxHttp;
 
 public class ConfigActivity extends BaseActivity {
 
@@ -66,7 +80,7 @@ public class ConfigActivity extends BaseActivity {
     private int returnResultCode = 0;
 
     private Handler handler;
-
+    private DevicesType devicesType;
 
     Toolbar toolbar;
     RelativeLayout btn;
@@ -112,13 +126,21 @@ public class ConfigActivity extends BaseActivity {
 
     @Override
     protected void initEvent() {
+        broadcastFilter();
         Intent intent = getIntent();
-        stateActivity = intent.getIntExtra("code", 1);
+        DevicesType s = (DevicesType) intent.getSerializableExtra("devicesType");
+        if (s != null) {
+            devicesType = s;
+        }
+
+
         handler = new Handler();
         WaitDialog.show("设备连接中...");
 
+
         if (Tool.isWifiConnect(getApplicationContext()) && Tool.getWifiDhcpAddress(getApplicationContext()).equals(IP)) {
-            httpPost(null, SocketDataBase.getHandshakeData());
+            httpHandshake(getHandshakeData());
+//            httpPost(null, getHandshakeData());
         } else {
             setConnectState(false);
             WaitDialog.dismiss();
@@ -135,8 +157,8 @@ public class ConfigActivity extends BaseActivity {
             if (isTest == -1) {
                 WaitDialog.show("设备连接中...");
                 if (Tool.isWifiConnect(getApplicationContext()) && Tool.getWifiDhcpAddress(getApplicationContext()).equals(IP)) {
-
-                    httpPost(null, SocketDataBase.getHandshakeData());
+                    httpHandshake(getHandshakeData());
+//                    httpPost(null, getHandshakeData());
                 } else {
                     WaitDialog.dismiss();
                     TipDialog.show("设备连接失败！", WaitDialog.TYPE.ERROR);
@@ -152,7 +174,7 @@ public class ConfigActivity extends BaseActivity {
                         "255.255.255.0",
                         getEditWifiGateway());
 
-                httpPost(null, data);
+                httpHandshake(data);
             } else if (isTest == 1) {
                 WaitDialog.show("配置信息保存中...");
                 String data = SocketDataBase.setDevicesInfoData(autoWifiIpState,
@@ -161,15 +183,14 @@ public class ConfigActivity extends BaseActivity {
                         getEditWifiIp(),
                         "255.255.255.0",
                         getEditWifiGateway(),
-                        getEditMqttHost(),
-                        getEditMqttPort(),
-                        getEditMqttUser(),
-                        getEditMqttPwd());
-                Log.i(TAG, "onClick: wifi 保存");
+                        Preferences.getValue("mqtt-host", "")/*"192.168.0.7"*/,
+                        String.valueOf(Preferences.getValue("mqtt-port", 1883)),
+                        Preferences.getValue("account", ""),
+                        Preferences.getValue("account_pwd", ""));
 
-                httpPost(null, data);
+                httpHandshake(data);
             } else if (isTest == 2) {
-                httpPost(null,SocketDataBase.getRestart());
+                uploading();
             }
 
 
@@ -299,161 +320,220 @@ public class ConfigActivity extends BaseActivity {
         returnResultCode = 1;
     }
 
+    private void httpHandshake(String s) {
 
-    /*
-     * http 请求
-     * */
-    private void httpPost(String mode, String date) {
-
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    URL url = new URL(URL);
-                    HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-                    connection.setRequestMethod("POST");
-                    connection.setDoOutput(true);
-                    connection.setDoInput(true);
-                    connection.setRequestProperty("GeneralId", "TOKEN");
-                    connection.setConnectTimeout(17000);
-                    connection.setReadTimeout(17000);
-
-                    // 提交数据（获取输出流，提交数据到输出流）
-                    DataOutputStream dataOutputStream = new DataOutputStream(connection.getOutputStream());
-                    dataOutputStream.writeBytes(date);
-                    dataOutputStream.close();
-
-                    if (connection.getResponseCode() == 200) {
-
-                        String res = is2String(connection.getInputStream());
-
-                        Log.i(TAG, "run: " + res);
-                        JSONObject jo = new JSONObject(res);
-                        JSONObject jsonObject = new JSONObject(res);
-                        String type = jsonObject.getString("type");
-
-                        if (type.equals("handshake")) {
-                            JSONObject data = jsonObject.getJSONObject("data");
-                            String id = data.getString("id");
-                            setDevicesId(id);
-                            setConnectState(true);
-                            isTest = 0;
-
-                            setBtnTxt(R.string.config_devices_wifi_connect_btn);
-                            handler.postDelayed(new Runnable() {
+        RxHttp.postJson("")
+                .setDomainToBaseUrlConfigIfAbsent()
+                .addHeader("GeneralId", "TOKEN")
+                .connectTimeout(17000)
+                .readTimeout(17000)
+                .writeTimeout(17000)
+                .addAll(s)
+                .toObservableString()
+                .to(RxLife.toMain(this))
+                .subscribe(this::dataDispose,
+                        e -> {
+                            Log.i(TAG, "httpHandshake: " + e.getMessage());
+                            handler.post(new Runnable() {
                                 @Override
                                 public void run() {
+                                    if (isTest == 0) {
+                                        WaitDialog.dismiss();
+                                        TipDialog.show("wifi连接失败！", WaitDialog.TYPE.ERROR);
+                                    } else if (isTest == 1) {
+                                        WaitDialog.dismiss();
+                                        TipDialog.show("配置信息保存失败！", WaitDialog.TYPE.ERROR);
+                                    } else if (isTest == -1) {
+                                        WaitDialog.dismiss();
+                                        TipDialog.show("设备连接失败！", WaitDialog.TYPE.ERROR);
+                                    } else if (isTest == 2) {
+                                        return;
+                                    }
+                                    setConnectState(false);
+                                    isTest = -1;
 
-                                    TipDialog.show("设备连接成功！", WaitDialog.TYPE.SUCCESS);
                                 }
-                            }, 1000);
+                            });
 
-                        } else if (type.equals("verifyDevicesInfo")) {
-                            JSONObject data = jsonObject.getJSONObject("data");
-                            Log.i(TAG, "onDataReceive: " + data.getBoolean("state"));
-                            if (data.getBoolean("state")) {
-                                isTest = 1;
-                                setBtnTxt(R.string.config_devices_save_btn);
 
+                        });
+    }
+
+
+    private void dataDispose(String s) throws JSONException {
+        JSONObject jo = new JSONObject(s);
+        JSONObject jsonObject = new JSONObject(s);
+        String type = jsonObject.getString("type");
+
+        if (type.equals("handshake")) {
+            JSONObject data = jsonObject.getJSONObject("data");
+            String id = data.getString("id");
+            String typeD = data.getString("devicesType");
+
+            if (!typeD.equals(devicesType.getType())) {
+                WaitDialog.dismiss();
+                PopTip.show("请选择正确的设备").iconWarning();
+                setDevicesId("类型错误");
+                setConnectState(false);
+                isTest = -1;
+                return;
+            }
+
+            setDevicesId(id);
+            setConnectState(true);
+            isTest = 0;
+
+            setBtnTxt(R.string.config_devices_wifi_connect_btn);
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+
+                    TipDialog.show("设备连接成功！", WaitDialog.TYPE.SUCCESS);
+                }
+            }, 500);
+
+        } else if (type.equals("verifyDevicesInfo")) {
+            JSONObject data = jsonObject.getJSONObject("data");
+            Log.i(TAG, "onDataReceive: " + data.getBoolean("state"));
+            if (data.getBoolean("state")) {
+                isTest = 1;
+                setBtnTxt(R.string.config_devices_save_btn);
+
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        WaitDialog.dismiss();
+                        TipDialog.show("wifi连接成功！", WaitDialog.TYPE.SUCCESS);
+                    }
+                }, 1000);
+                return;
+            }
+
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    WaitDialog.dismiss();
+                    TipDialog.show("wifi连接失败！", WaitDialog.TYPE.ERROR);
+                }
+            }, 1000);
+
+
+        } else if (type.equals("setDevicesInfo")) {
+            JSONObject data = jsonObject.getJSONObject("data");
+            if (data.getBoolean("state")) {
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        setBtnTxt(R.string.config_devices_restart);
+                        WaitDialog.dismiss();
+                        TipDialog.show("配置信息保存成功！", WaitDialog.TYPE.SUCCESS);
+                    }
+                }, 500);
+                isTest = 2;
+
+                PopTip.show("即将重新启动设备").iconWarning();
+                httpHandshake(SocketDataBase.getRestart());
+                djs.start();
+
+
+                return;
+            }
+
+
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    WaitDialog.dismiss();
+                    TipDialog.show("配置信息保存失败！", WaitDialog.TYPE.ERROR);
+                }
+            }, 1000);
+
+        }
+    }
+
+
+    private void uploading() {
+        JSONObject addDevices = new JSONObject();
+        JSONObject jsonObject1 = new JSONObject();
+        try {
+            jsonObject1.put("name", getEditName());
+            jsonObject1.put("id", getDevicesId());
+            jsonObject1.put("type", devicesType.getType());
+            jsonObject1.put("pic", devicesType.getPicUrl());
+            addDevices.put("addDevices", jsonObject1);
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
+        }
+
+        Log.i(TAG, "uploading: "+addDevices.toString());
+
+        MessageDialog.show("设备信息上传", "").setCustomView(new OnBindView<MessageDialog>(R.layout.activity_devices_info_up) {
+            @Override
+            public void onBind(MessageDialog dialog, View v) {
+
+                RxHttp.postJson("/devices/add")
+                        .addAll(addDevices.toString())
+                        .toObservableString()
+                        .to(RxLife.toMain(ConfigActivity.this))
+                        .subscribe(s -> {
+
+                            JSONObject jo = new JSONObject(s);
+                            int code = (int) jo.get("code");
+                            if (code == 200){
+                                PopTip.show("上传成功").iconSuccess();
                                 handler.postDelayed(new Runnable() {
                                     @Override
                                     public void run() {
-                                        WaitDialog.dismiss();
-                                        TipDialog.show("wifi连接成功！", WaitDialog.TYPE.SUCCESS);
+                                        finish();
                                     }
                                 }, 1000);
-                                return;
+                            } else if (code == 401) {
+                                PopTip.show(jo.get("msg").toString()).iconError();
+                            } else if (code == 405) {
+                                broadcastUpdateLoginState(false);
+                                PopTip.show(jo.get("登录已过期").toString()).iconError();
+                            }else {
+                                PopTip.show(jo.get("msg").toString()).iconError();
                             }
 
-                            handler.postDelayed(new Runnable() {
-                                @Override
-                                public void run() {
-                                    WaitDialog.dismiss();
-                                    TipDialog.show("wifi连接失败！", WaitDialog.TYPE.ERROR);
-                                }
-                            }, 1000);
+                            dialog.dismiss();
 
+                        }, e -> {
+                            /*Log.i(TAG, "onBind: "+e.getMessage());
+                            int code = Tool.ErrorInfo(e);
+                            if (code == 6) {
+                                broadcastUpdateLoginState(false);
+                            }*/
+                            isTest = 2;
 
-                        } else if (type.equals("setDevicesInfo")) {
-                            JSONObject data = jsonObject.getJSONObject("data");
-                            if (data.getBoolean("state")) {
-                                Log.i(TAG, "onDataReceive: state true");
-                                handler.postDelayed(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        setBtnTxt(R.string.config_devices_restart);
-                                        saveInfo();
-                                        WaitDialog.dismiss();
-                                        TipDialog.show("配置信息保存成功！", WaitDialog.TYPE.SUCCESS);
-                                    }
-                                },1000);
-                                isTest = 2;
-
-                                return;
-                            }
-
-
-                            handler.postDelayed(new Runnable() {
-                                @Override
-                                public void run() {
-                                    WaitDialog.dismiss();
-                                    TipDialog.show("配置信息保存失败！", WaitDialog.TYPE.ERROR);
-                                }
-                            },1000);
-
-                        }
-
-
-                    }
-
-                } catch (Exception e) {
-                    handler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            if (isTest == 0){
-                                WaitDialog.dismiss();
-                                TipDialog.show("wifi连接失败！", WaitDialog.TYPE.ERROR);
-                            } else if (isTest == 1) {
-                                WaitDialog.dismiss();
-                                TipDialog.show("配置信息保存失败！", WaitDialog.TYPE.ERROR);
-                            } else if (isTest == -1) {
-
-                                WaitDialog.dismiss();
-                                TipDialog.show("设备连接失败！", WaitDialog.TYPE.ERROR);
-                            }
-                            setConnectState(false);
-                            isTest = -1;
-
-                        }
-                    });
-
-                }
+                        });
 
             }
-        }).start();
+        });
 
 
     }
 
 
-
-
-    public String is2String(InputStream is) throws IOException {
-
-        //连接后，创建一个输入流来读取response
-        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(is, "utf-8"));
-        String line = "";
-        StringBuilder stringBuilder = new StringBuilder();
-        String response = "";
-        //每次读取一行，若非空则添加至 stringBuilder
-        while ((line = bufferedReader.readLine()) != null) {
-            stringBuilder.append(line);
+    private CountDownTimer djs = new CountDownTimer(5000, 1080) {
+        @Override
+        public void onTick(long l) {
+            btn.setEnabled(false);
+            btn_txt.setText((l / 1000) + "后上传信息");
         }
-        //读取所有的数据后，赋值给 response
-        response = stringBuilder.toString().trim();
-        return response;
-    }
 
+        @Override
+        public void onFinish() {
+            btn.setEnabled(true);
+            btn_txt.setText(getResources().getString(R.string.config_devices_uploading));
+        }
+    };
+
+    void broadcastUpdateLoginState(boolean is) {
+        Intent intent = new Intent(BroadcastTag.ACTION_LOGIN_STATE);
+        intent.putExtra(BroadcastTag.ACTION_LOGIN_STATE, is);
+        localBroadcastManager.sendBroadcast(intent);
+    }
 
     /*
      * 广播监听
@@ -469,6 +549,6 @@ public class ConfigActivity extends BaseActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        setResult(1);
+//        setResult(1);
     }
 }

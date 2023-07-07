@@ -35,7 +35,7 @@ import com.kt.whose.subordinate.HttpEntity.DevicesList;
 import com.kt.whose.subordinate.HttpEntity.Login;
 import com.kt.whose.subordinate.Interface.ClickListener;
 import com.kt.whose.subordinate.R;
-import com.kt.whose.subordinate.RefreshStyle.RefreshLottieHeader;
+import com.kt.whose.subordinate.ExtendView.RefreshLottieHeader;
 import com.kt.whose.subordinate.Utils.Preferences;
 import com.kt.whose.subordinate.Utils.Tool;
 import com.kt.whose.subordinate.Utils.sqlModel.DevicesInfoSql;
@@ -45,7 +45,6 @@ import com.scwang.smart.refresh.layout.SmartRefreshLayout;
 import com.scwang.smart.refresh.layout.api.RefreshLayout;
 import com.scwang.smart.refresh.layout.listener.OnRefreshListener;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.litepal.LitePal;
@@ -53,6 +52,7 @@ import org.litepal.LitePal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -117,8 +117,7 @@ public class DevicesFragment extends NewLazyFragment {
         mDevicesRecycler = view.findViewById(R.id.devices_recycler);
 
         mDevicesMainAdapter = new DevicesMainAdapter(getContext());
-        /*mDevicesMainAdapter.setOnClickListener(onClickAdapterListener);*/
-        mDevicesMainAdapter.setClickDevicesInfoListener(devicesInfoListener);
+        mDevicesMainAdapter.setOnClickListener(onClickAdapterListener);
         mDevicesMainAdapter.setOnLongClickListener(onLongClickAdapterListener);
         mDevicesMainAdapter.setDevicesDisConnectedListener(devicesDisConnectedListener);
 
@@ -139,7 +138,9 @@ public class DevicesFragment extends NewLazyFragment {
                     return;
                 }
                 Intent intent = new Intent(getContext(), AddDevicesActivity.class);
-                intentActivityResultLauncher.launch(intent);
+                startActivity(intent);
+//                intentActivityResultLauncher.launch(intent);
+
 
             }
         });
@@ -152,7 +153,7 @@ public class DevicesFragment extends NewLazyFragment {
     protected void initData() {
         super.initData();
 //        setItemConnectState();
-        mDevicesMainAdapter.setItemConnectState();
+//        mDevicesMainAdapter.setItemConnectState();
     }
 
     @Override
@@ -208,23 +209,23 @@ public class DevicesFragment extends NewLazyFragment {
         String account = Preferences.getValue("account", "");
         String pwd = Preferences.getValue("account_pwd", "");
         RxHttp.postJson("/user/login")
+                .setAssemblyEnabled(false)
                 .add("user", account)
                 .add("pwd", pwd)
                 .toObservableResponse(Login.class)
                 .to(RxLife.toMain(this))
                 .subscribe(s -> {
-                    Log.i(TAG, "login: " + s.getDevices().size());
+
                     BaseApplication.setToken(s.getToken());
+                    BaseApplication.setUserId(Tool.md5(account+"-ks"));
                     finishRefresh(500);
                     loginDataDispose(s.getDevices());
                     broadcastUpdateLoginState(true);
                 }, throwable -> {
-
                     int code = Tool.ErrorInfo(throwable);
                     refreshTick = -1;
                     finishRefresh(500);
                 });
-
 
     }
 
@@ -232,7 +233,7 @@ public class DevicesFragment extends NewLazyFragment {
     private void loginDataDispose(List<Devices> devices) {
         refreshTick = 0;
         setHeader("002.json");
-        userId = Preferences.getValue("userId", "");
+//        userId = Preferences.getValue("userId", "");
         if (devices != null || devices.size() != 0) {
             devicesList.addAll(devices);
             mDevicesMainAdapter.notifyDataSetChanged();
@@ -243,14 +244,15 @@ public class DevicesFragment extends NewLazyFragment {
 
     private void refreshData() {
 
+
         if (BaseApplication.getToken() == null) {
             finishRefresh(500);
-//            PopTip.show("未登录").iconWarning();
+            PopTip.show("登录已过期").iconWarning();
             return;
         }
 
         RxHttp.postJson("/devices/list")
-                .addHeader("UserToken", BaseApplication.getToken())
+//                .addHeader("UserToken", BaseApplication.getToken())
                 .toObservableResponse(DevicesList.class)
                 .to(RxLife.toMain(this))
                 .subscribe(s -> {
@@ -270,13 +272,12 @@ public class DevicesFragment extends NewLazyFragment {
 
     private void refreshDataDispose(List<Devices> devices) {
         if (devicesList.size() == 0) {
-            Log.i(TAG, "refreshDataDispose: fffffffffffff");
-            subscribeDevicesTopic(devices);
+//            subscribeDevicesTopic(devices);
             devicesList.addAll(devices);
             mDevicesMainAdapter.notifyDataSetChanged();
         } else {
 //            mDevicesMainAdapter.filterData(devices);
-            Log.i(TAG, "refreshDataDispose: " + devices.size());
+
             filterData(devices);
 
         }
@@ -321,9 +322,9 @@ public class DevicesFragment extends NewLazyFragment {
         Log.i(TAG, "filterData: " + andOld_o.toString());
         for (String key : andOld_o) {
             Devices devices = devicesOldHashMap.get(key);
-            String topic = "ks/subordinate/" + userId + "/" + devices.getDevicesId() + "/state";
+            //String topic = "ks/subordinate/" + userId + "/" + devices.getDevicesId() + "/state";
             int i = devicesList.indexOf(devices);
-            mqttService.unsubscribe(topic);
+            //mqttService.unsubscribe(topic);
             devicesList.remove(i);
             mDevicesMainAdapter.notifyItemRemoved(i);
             mDevicesMainAdapter.notifyItemRangeRemoved(i, devicesList.size() - i);
@@ -335,8 +336,8 @@ public class DevicesFragment extends NewLazyFragment {
         Log.i(TAG, "filterData: " + andNow_n.toString());
         for (String key : andNow_n) {
             Devices devices = devicesNewHashMap.get(key);
-            String topic = "ks/subordinate/" + userId + "/" + devices.getDevicesId() + "/state";
-            mqttService.subscribe(topic, 0);
+            //String topic = "ks/subordinate/" + userId + "/" + devices.getDevicesId() + "/state";
+            //mqttService.subscribe(topic, 0);
             devicesList.add(devices);
 
             mDevicesMainAdapter.notifyItemInserted(devicesList.size() - 1);
@@ -344,44 +345,6 @@ public class DevicesFragment extends NewLazyFragment {
 
         mDevicesMainAdapter.notifyDataSetChanged();
 
-    }
-
-
-    /*
-     * 局部更新数据->添加
-     * */
-    private List<Devices> findDifferentUsers(List<Devices> list1, List<Devices> list2) {
-        List<Devices> differentUsers = new ArrayList<>();
-
-        for (Devices t : list1) {
-            boolean found = false;
-            // 添加item
-            for (Devices t1 : list2) {
-                if (t.getDevicesId().equals(t1.getDevicesId())) {
-                    found = true;
-                    break;
-                }
-            }
-
-            // 更新item属性
-            boolean updateItem = false;
-            for (Devices t1 : list2) {
-                if (t.getDevicesId().equals(t1.getDevicesId())) {
-                    if (t.getName().equals(t1.getName()) || t.getPicUrl().equals(t1.getPicUrl())) {
-                        updateItem = true;
-                    }
-                }
-            }
-
-            if (updateItem) {
-
-            }
-
-            if (!found) {
-                differentUsers.add(t);
-            }
-        }
-        return differentUsers;
     }
 
 
@@ -417,18 +380,17 @@ public class DevicesFragment extends NewLazyFragment {
     /*
      * 设备item点击
      * */
-    private DevicesMainAdapter.ClickDevicesInfoListener devicesInfoListener = new DevicesMainAdapter.ClickDevicesInfoListener() {
+    /*private DevicesMainAdapter.ClickDevicesInfoListener devicesInfoListener = new DevicesMainAdapter.ClickDevicesInfoListener() {
         @Override
         public void onDevicesInfo(Devices devices) {
 
-            long id = devices.getId();
 
             Intent intent = new Intent(getContext(), RgbDevicesControlActivity.class);
-            intent.putExtra("info", id);
+
             startActivity(intent);
 
         }
-    };
+    };*/
 
     /*
      * 设备掉线
@@ -447,6 +409,10 @@ public class DevicesFragment extends NewLazyFragment {
     private ClickListener.OnClickListener onClickAdapterListener = new ClickListener.OnClickListener() {
         @Override
         public void onClick(int i) {
+            Devices devices = devicesList.get(i);
+            Intent intent = new Intent(getContext(), RgbDevicesControlActivity.class);
+            intent.putExtra("info", devices);
+            startActivity(intent);
 
         }
     };
@@ -492,8 +458,11 @@ public class DevicesFragment extends NewLazyFragment {
                 handler.post(new Runnable() {
                     @Override
                     public void run() {
+                        Log.i(TAG, "run: 连接成功");
+                        mqttService.subscribe("ks/subordinate/" + BaseApplication.getUserId() + "/devices/state", 0);
+
                         if (devicesList != null && devicesList.size() != 0) {
-                            subscribeDevicesTopic(devicesList);
+//                            subscribeDevicesTopic(devicesList);
                         }
                     }
                 });
@@ -501,6 +470,7 @@ public class DevicesFragment extends NewLazyFragment {
             } else if (BroadcastTag.ACTION_DATA_AVAILABLE.equals(action)) {
                 String topic = intent.getStringExtra(BroadcastTag.EXTRA_DATA_TOPIC);
                 String msg = intent.getStringExtra(BroadcastTag.EXTRA_DATA_MESSAGE);
+//                Log.i(TAG, "onReceive: "+msg);
                 receiveMsgDispose(topic, msg);
             } else if (BroadcastTag.ACTION_LOGIN_STATE.equals(action)) {
                 Log.i(TAG, "onReceive: " + intent.getBooleanExtra(BroadcastTag.ACTION_LOGIN_STATE, false));
@@ -511,7 +481,7 @@ public class DevicesFragment extends NewLazyFragment {
                         public void run() {
                             refreshTick = 0;
                             setHeader("002.json");
-                            userId = Preferences.getValue("userId", "");
+//                            userId = Preferences.getValue("userId", "");
                         }
                     });
                 } else {
@@ -558,13 +528,39 @@ public class DevicesFragment extends NewLazyFragment {
     }
 
 
-    // msg 处理（msg 信息更新到ui）
+    // msg 处理（设备状态更新到ui）
     private void receiveMsgDispose(String topic, String msg) {
+        Log.i(TAG, "receiveMsgDispose: "+topic);
         String[] split = topic.split("/");
-        if (!split[split.length - 1].equals("state")) {
+        if (!split[split.length - 1].equals("state") || !split[split.length-2].equals("devices")) {
             return;
         }
-        String id = split[split.length - 2];
+
+        try {
+            JSONObject jo = new JSONObject(msg);
+            Iterator<String> keys = jo.keys();
+
+            while (keys.hasNext()){
+                String key = keys.next();
+                for (Devices devices:devicesList){
+                    int i = devicesList.indexOf(devices);
+                    if (key.equals(devices.getDevicesId())) {
+                        devices.setState(jo.getBoolean(key));
+                        mDevicesMainAdapter.notifyItemChanged(i);
+                    }
+                }
+            }
+           mDevicesMainAdapter.notifyDataSetChanged();
+
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
+        }
+
+
+
+
+
+        /*String id = split[split.length - 2];
         int index = -1;
         for (int i = 0; i < devicesList.size(); i++) {
             if (id.equals(devicesList.get(i).getDevicesId())) {
@@ -589,7 +585,7 @@ public class DevicesFragment extends NewLazyFragment {
 
         } catch (JSONException e) {
             throw new RuntimeException(e);
-        }
+        }*/
 
     }
 

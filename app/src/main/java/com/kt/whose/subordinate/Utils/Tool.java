@@ -9,6 +9,7 @@ import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.google.gson.JsonSyntaxException;
@@ -176,10 +177,12 @@ public class Tool {
         } else if (throwable instanceof ParseException) {
             // ParseException异常表明请求成功，但是数据不正确
             if (((ParseException) throwable).getErrorCode().equals("400")){
+
                 errorCode = 5;
             }else {
                 errorCode = 6;
             }
+
 
             errorMsg = throwable.getMessage();
 

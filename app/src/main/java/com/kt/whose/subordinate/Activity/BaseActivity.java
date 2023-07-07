@@ -20,21 +20,19 @@ public abstract class BaseActivity extends AppCompatActivity {
 
     LocalBroadcastManager localBroadcastManager;
     KsMqttService mqttService;
+    private boolean servicesState = false;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(initLayoutId());
         WindowInsetsControllerCompat wic = ViewCompat.getWindowInsetsController(getWindow().getDecorView());
         if (wic != null) {
-
             // true表示Light Mode，状态栏字体呈黑色，反之呈白色
             wic.setAppearanceLightStatusBars(true);
-
         }
 
         initView();
         initEvent();
-
 
     }
 
@@ -59,6 +57,7 @@ public abstract class BaseActivity extends AppCompatActivity {
 
 
     public void bindService(){
+        servicesState = true;
         Intent intent = new Intent(this,KsMqttService.class);
         bindService(intent,mqttServiceConnection,BIND_AUTO_CREATE);
     }
@@ -77,4 +76,14 @@ public abstract class BaseActivity extends AppCompatActivity {
         }
     };
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        if (servicesState){
+            unbindService(mqttServiceConnection);
+        }
+
+
+    }
 }

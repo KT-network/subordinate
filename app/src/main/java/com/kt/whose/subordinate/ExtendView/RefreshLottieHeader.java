@@ -1,4 +1,4 @@
-package com.kt.whose.subordinate.RefreshStyle;
+package com.kt.whose.subordinate.ExtendView;
 
 import android.content.Context;
 import android.view.LayoutInflater;

@@ -1,8 +1,9 @@
 
 package com.kt.whose.subordinate.HttpEntity;
+import java.io.Serializable;
 import java.util.Date;
 
-public class DevicesType {
+public class DevicesType implements Serializable {
 
     private int id;
     private String name;
